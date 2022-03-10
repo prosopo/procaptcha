@@ -58,5 +58,20 @@ export const useStyles = makeStyles({
   iAmHumanButtonLabel: {
     color: "#555555",
     textTransform: "none"
+  },
+  dotsContainer: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+    paddingBottom: 15,
+    paddingTop: 10
+  },
+  dot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    marginRight: 5,
+    border: "1px solid #CFCFCF"
   }
 });

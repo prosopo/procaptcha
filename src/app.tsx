@@ -20,6 +20,8 @@ import {
 } from "@mui/material";
 import { useStyles } from "./app.styles";
 
+import CaptchaPuzzle from "./mockedResponses/captchaPuzzle.json";
+
 const contract = new ProsopoContract(
   new HttpProvider(),
   "5Guo3SqQguAJERaV1fsCFCyVDWp4AkXCBzYFr84QvESrtiyU"
@@ -29,10 +31,35 @@ function App() {
   const [account, setAccount] = useState(null);
   const classes = useStyles();
   const [showCaptchas, setShowCaptchas] = useState(false);
+  const [totalNumberOfCaptchas, setTotalNumberOfCaptchas] = useState(0);
+  const [currentCaptchaIndex, setCurrentCaptchaIndex] = useState(0);
+
+  const accounts = contract.extension?.getAllAcounts();
+  const captchas = CaptchaPuzzle.captchas;
+
+  useEffect(() => {
+    setTotalNumberOfCaptchas(captchas.length);
+  }, [captchas]);
 
   const toggleShowCaptchas = () => {
     setShowCaptchas(!showCaptchas);
     setAccount(null);
+  };
+
+  const cancelCaptchasHandler = () => {
+    setShowCaptchas(false);
+    setAccount(null);
+    setCurrentCaptchaIndex(0);
+  };
+
+  const submitCaptchaHandler = () => {
+    if (currentCaptchaIndex === totalNumberOfCaptchas - 1) {
+      setShowCaptchas(!showCaptchas);
+      setAccount(null);
+      setCurrentCaptchaIndex(0);
+    } else {
+      setCurrentCaptchaIndex(currentCaptchaIndex + 1);
+    }
   };
 
   // useEffect(() => {
@@ -55,8 +82,6 @@ function App() {
       .setAccount(account.address)
       .then(({ address }) => setAccount(address));
   };
-
-  const accounts = contract.extension?.getAllAcounts();
 
   // const onClick = () => {
   //   const provider = contract.getRandomProvider();
@@ -103,14 +128,30 @@ function App() {
                 />
               );
             })}
+
+            <Box className={classes.dotsContainer}>
+              {Array.from(Array(totalNumberOfCaptchas).keys()).map((item) => {
+                return (
+                  <Box
+                    className={classes.dot}
+                    style={{
+                      backgroundColor:
+                        currentCaptchaIndex === item ? "#CFCFCF" : "#FFFFFF"
+                    }}
+                  />
+                );
+              })}
+            </Box>
           </Box>
 
           <Box className={classes.captchasFooter}>
-            <Button onClick={toggleShowCaptchas} variant="text">
+            <Button onClick={cancelCaptchasHandler} variant="text">
               Cancel
             </Button>
-            <Button onClick={toggleShowCaptchas} variant="contained">
-              Submit
+            <Button onClick={submitCaptchaHandler} variant="contained">
+              {currentCaptchaIndex === totalNumberOfCaptchas - 1
+                ? "Submit"
+                : "Next"}
             </Button>
           </Box>
         </Box>
