@@ -6,6 +6,7 @@ import { blake2AsU8a } from "@polkadot/util-crypto";
 import { isHex, isU8a } from "@polkadot/util";
 import { AnyJson } from '@polkadot/types/types/codec'
 import { ProviderInterface } from "@polkadot/rpc-provider/types";
+import ProviderApi from "@prosopo/provider/src/contract"
 import Extension, { NoExtensionCallback } from "./Extension";
 
 // TODO: import from provider
@@ -55,6 +56,9 @@ class ProsopoContractBase {
      * @param noExtCb - callback when no extension was found
      */
     constructor(provider: ProviderInterface, contractAddress: string, noExtCb?: NoExtensionCallback) {
+        ProviderApi().then(tasks => {
+            console.log('Done...')
+        })
         this.initPromise = new Promise(async (resolve) => {
             this.api = await ApiPromise.create({ provider });
             this.abi = new Abi(abiJson, this.api.registry.getChainProperties());
