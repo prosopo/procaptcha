@@ -1,5 +1,6 @@
 import ProsopoContractBase from "./ProsopoContractBase";
 
+
 // TODO: import return types from provider
 class ProsopoContract extends ProsopoContractBase {
     public getRandomProvider() {

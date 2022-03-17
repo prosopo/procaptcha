@@ -7,9 +7,8 @@ import React, {
 import "./App.css";
 import { extensionTest } from "./api";
 import ProsopoContract from "./api/ProsopoContract";
+import ProviderApi from "./api/providerApi";
 import { HttpProvider } from "@polkadot/rpc-provider";
-import { prosopoMiddleware } from "@prosopo/provider/src/api";
-import { Environment } from "@prosopo/provider/src/env";
 import {
   Avatar,
   Box,
@@ -24,8 +23,10 @@ import CaptchaPuzzle from "./mockedResponses/captchaPuzzle.json";
 
 const contract = new ProsopoContract(
   new HttpProvider(),
-  "5Guo3SqQguAJERaV1fsCFCyVDWp4AkXCBzYFr84QvESrtiyU"
+  "5GVfbq41QmCu4kN9Lx6EGgtzD1MN5YeP4rJRYhKyVBXv8dcw"
 );
+
+const providerApi = new ProviderApi("http://localhost:3000");
 
 function App() {
   const [account, setAccount] = useState(null);
@@ -78,9 +79,17 @@ function App() {
   // }
 
   const accountOnChange = (e: SyntheticEvent<Element, Event>, account: any) => {
-    contract.extension
-      .setAccount(account.address)
-      .then(({ address }) => setAccount(address));
+    contract.extension.setAccount(account.address).then(async ({ address }) => {
+      setAccount(address);
+      const randomProvider: any = await providerApi.getRandomProvider();
+      console.log(randomProvider);
+      const captchaPuzzle = await providerApi.getCaptchaPuzzle(
+        randomProvider.provider.captcha_dataset_id,
+        randomProvider.provider.service_origin,
+        randomProvider.block_number
+      );
+      console.log(captchaPuzzle);
+    });
   };
 
   // const onClick = () => {
