@@ -5,7 +5,7 @@
     "module": "commonjs",
     "outDir": "./build",
     "esModuleInterop": true,
-    "strict": true,
+    "strict": false,
     "skipLibCheck": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
@@ -19,13 +19,21 @@
     "strictPropertyInitialization": false,
     "noEmitOnError": true,
     "baseUrl": ".",
+    "rootDir": "../../",
+    "jsx": "react-jsx",
     "composite": true,
     "paths": {
       "@prosopo/contract": ["../provider/packages/contract/src"],
       "@prosopo/contract/*": ["../provider/packages/contract/src/*"]
     }
   },
-  "include": ["packages/**/*.ts", "packages/**/*.json"],
+  "include": [
+    "packages/**/*.ts",
+    "packages/**/*.tsx",
+    "packages/**/*.json",
+    "../provider/packages/**/*.ts",
+    "../provider/packages/**/*.json"
+  ],
   "exclude": [
     "node_modules",
     "artifacts",
