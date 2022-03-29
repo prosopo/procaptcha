@@ -18,6 +18,7 @@ import {
   TextField
 } from "@mui/material";
 import { useStyles } from "./app.styles";
+import { InjectedAccountWithMeta } from "@polkadot/extension-inject/types"
 
 import CaptchaPuzzle from "./mockedResponses/captchaPuzzle.json";
 
@@ -28,8 +29,10 @@ const contract = new ProsopoContract(
 
 const providerApi = new ProviderApi("http://localhost:3000");
 
+declare type UserData = InjectedAccountWithMeta | null | undefined
+
 function App() {
-  const [account, setAccount] = useState(null);
+  const [account, setAccount] = useState<UserData | null>(null);
   const classes = useStyles();
   const [showCaptchas, setShowCaptchas] = useState(false);
   const [totalNumberOfCaptchas, setTotalNumberOfCaptchas] = useState(0);

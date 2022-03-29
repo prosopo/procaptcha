@@ -78,7 +78,7 @@ class Extension {
         return this._loadAccount();
     }
 
-    public async setAccount(address: string) {
+    public async setAccount(address: string): Promise<InjectedAccountWithMeta> {
         await this.waitAndThrowIfNotReady();
         const account = this.allAccounts.find(acc => acc.address === address);
         if (!account) {
@@ -105,10 +105,10 @@ class Extension {
 
     public async signRaw(raw: Omit<SignerPayloadRaw, "address">) {
         await this.waitAndThrowIfNotReady();
-        return this.injected.signer.signRaw({
+        return (this.injected.signer && this.injected.signer.signRaw && this.injected.signer.signRaw({
             address: this.account.address,
             ...raw
-        })
+        }))
     }
 }
 

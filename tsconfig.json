@@ -1,38 +1,43 @@
 {
   "compilerOptions": {
-    "types": ["node"],
-    "target": "ES2019",
-    "module": "commonjs",
-    "outDir": "./build",
-    "esModuleInterop": true,
-    "strict": false,
-    "skipLibCheck": true,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noImplicitAny": false,
-    "declaration": true,
-    "resolveJsonModule": true,
-    "noImplicitReturns": false,
-    "noImplicitThis": false,
+    "target": "esnext",  // DO NOT CHANGE!
+    "module": "commonjs",  // DO NOT CHANGE!
     "moduleResolution": "node",
+    "allowJs": true,
+    "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+    "sourceMap": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "declaration": true,
+    "strict": true,
+    "noImplicitAny": false /* Raise error on expressions and declarations with an implied 'any' type. */,
+    "strictNullChecks": true /* Enable strict null checks. */,
+    "strictFunctionTypes": true /* Enable strict checking of function types. */,
     "strictPropertyInitialization": false,
-    "noEmitOnError": true,
-    "baseUrl": ".",
-    "rootDir": "../../",
-    "jsx": "react-jsx",
+    "noUnusedLocals": false /* Report errors on unused locals. */,
+    "noUnusedParameters": false /* Report errors on unused parameters. */,
+    "noImplicitReturns": true /* Report error when not all code paths in function return a value. */,
+    "noFallthroughCasesInSwitch": true /* Report errors for fallthrough cases in switch statement. */,
+    "importHelpers": true,
+    "skipLibCheck": true,
     "composite": true,
-    "paths": {
-      "@prosopo/contract": ["../provider/packages/contract/src"],
-      "@prosopo/contract/*": ["../provider/packages/contract/src/*"]
-    }
+    "types": [
+      "node",
+    ],
+    "lib": [
+      "ES6",
+      "dom"
+    ],
+    "rootDir": "./",
+    "outDir": "./build",
+    "baseUrl": ".",
+    "jsx": "react-jsx"
   },
   "include": [
     "packages/**/*.ts",
     "packages/**/*.tsx",
     "packages/**/*.json",
-    "../provider/packages/**/*.ts",
-    "../provider/packages/**/*.json"
   ],
   "exclude": [
     "node_modules",
