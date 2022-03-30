@@ -1,11 +1,5 @@
-import React, {
-  useState,
-  useEffect,
-  ChangeEventHandler,
-  SyntheticEvent
-} from "react";
+import React, { useState, useEffect, SyntheticEvent } from "react";
 import "./App.css";
-import { extensionTest } from "./api";
 import ProsopoContract from "./api/ProsopoContract";
 import ProviderApi from "./api/providerApi";
 import { HttpProvider } from "@polkadot/rpc-provider";
@@ -18,7 +12,7 @@ import {
   TextField
 } from "@mui/material";
 import { useStyles } from "./app.styles";
-import { InjectedAccountWithMeta } from "@polkadot/extension-inject/types"
+import { InjectedAccountWithMeta } from "@polkadot/extension-inject/types";
 
 import CaptchaPuzzle from "./mockedResponses/captchaPuzzle.json";
 
@@ -29,7 +23,7 @@ const contract = new ProsopoContract(
 
 const providerApi = new ProviderApi("http://localhost:3000");
 
-declare type UserData = InjectedAccountWithMeta | null | undefined
+declare type UserData = InjectedAccountWithMeta | null | undefined;
 
 function App() {
   const [account, setAccount] = useState<UserData | null>(null);
@@ -82,8 +76,8 @@ function App() {
   // }
 
   const accountOnChange = (e: SyntheticEvent<Element, Event>, account: any) => {
-    contract.extension.setAccount(account.address).then(async ({ address }) => {
-      setAccount(address);
+    contract.extension.setAccount(account.address).then(async (account) => {
+      setAccount(account);
       const randomProvider: any = await providerApi.getRandomProvider();
       console.log(randomProvider);
       const captchaPuzzle = await providerApi.getCaptchaPuzzle(
