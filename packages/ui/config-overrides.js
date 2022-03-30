@@ -1,8 +1,16 @@
 const NodePolyfillPlugin = require("node-polyfill-webpack-plugin");
 const ModuleScopePlugin = require("react-dev-utils/ModuleScopePlugin");
+const webpack = require("webpack");
 
 module.exports = function override(config, env) {
-  config.plugins = [...config.plugins, new NodePolyfillPlugin()];
+  config.plugins = [
+    ...config.plugins,
+    new NodePolyfillPlugin(),
+    new webpack.ContextReplacementPlugin(/redspot|mocha|express/),
+    new webpack.IgnorePlugin({
+      resourceRegExp: /ts-node|perf_hooks/
+    })
+  ];
   config.resolve = {
     ...config.resolve,
     fallback: {
@@ -15,6 +23,7 @@ module.exports = function override(config, env) {
       tls: false
     }
   };
+  config.ignoreWarnings = [/Failed to parse source map/];
   config.resolve.plugins = config.resolve.plugins.filter(
     (plugin) => !(plugin instanceof ModuleScopePlugin)
   );
