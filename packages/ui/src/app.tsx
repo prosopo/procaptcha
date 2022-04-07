@@ -34,7 +34,6 @@ function App() {
   const captchas = CaptchaPuzzle.captchas;
 
   useEffect(() => {
-    // @TODO get contract address from providerApi.
     providerApi.getContractAddress()
       .then(address => {
         console.log("ADDRESS", address.contractAddress);
