@@ -3,7 +3,8 @@ import axios, { AxiosInstance, AxiosResponse } from "axios";
 class HttpClientBase {
   protected readonly instance: AxiosInstance;
 
-  constructor(baseURL: string) {
+  constructor(baseURL: string, prefix = "/v1/prosopo") {
+    baseURL = baseURL + prefix;
     this.instance = axios.create({
       baseURL
     });

@@ -2,12 +2,18 @@ import HttpClientBase from "./httpClientBase";
 import Storage from "./storage";
 
 class ProviderApi extends HttpClientBase {
-  private getRandomProviderAPI = "/v1/prosopo/random_provider";
-  private getCaptchaPuzzleAPI = "/v1/prosopo/provider/captcha";
 
+  /**
+   * 
+   * @deprecated use ProsopoContract$getRandomProvider instead
+   */
   public getRandomProvider() {
     const userAccount = Storage.getAccount();
-    return this.instance.get(`${this.getRandomProviderAPI}/${userAccount}`);
+    return this.instance.get(`/random_provider/${userAccount}`);
+  }
+
+  public getContractAddress(): Promise<{contractAddress: string}> {
+    return this.instance.get(`/contract_address`);
   }
 
   public getCaptchaPuzzle(
@@ -16,7 +22,7 @@ class ProviderApi extends HttpClientBase {
     blockNumber: string
   ) {
     return this.instance.get(
-      `${this.getCaptchaPuzzleAPI}/${datasetId}/${userAccount}/${parseInt(
+      `/provider/captcha/${datasetId}/${userAccount}/${parseInt(
         blockNumber.replace(/,/g, "")
       )}`
     );
