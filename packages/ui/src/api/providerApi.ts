@@ -5,7 +5,7 @@ class ProviderApi extends HttpClientBase {
 
   /**
    * 
-   * @deprecated use ProsopoContract$getRandomProvider instead
+   * @deprecated use ProsopoContract$getRandomProvider instead.
    */
   public getRandomProvider() {
     const userAccount = Storage.getAccount();
@@ -14,6 +14,10 @@ class ProviderApi extends HttpClientBase {
 
   public getContractAddress(): Promise<{contractAddress: string}> {
     return this.instance.get(`/contract_address`);
+  }
+
+  public getProviders(): Promise<{accounts: string[]}> {
+    return this.instance.get(`/providers/`);
   }
 
   public getCaptchaPuzzle(

@@ -50,7 +50,7 @@ class ProsopoContractBase {
     }
   }
 
-  public async query(method: string, args: any[]): Promise<AnyJson | null> {
+  public async query<T>(method: string, args: any[]): Promise<T | AnyJson | null> {
     try {
       this.throwIfNotReady();
       const abiMessage = this.abi.findMessage(method);

@@ -38,13 +38,14 @@ function App() {
       .then(address => {
         console.log("ADDRESS", address.contractAddress);
         getProsopoContract(address.contractAddress)
-        .then(contract => {
-            console.log("CONTRACT", contract);
-            setContract(contract);
-            setAccounts(contract.extension.getAllAcounts());
-        }).catch(err => { 
-            console.error(err);
-        });
+          .then(contract => {
+              console.log("CONTRACT", contract);
+              setContract(contract);
+              setAccounts(contract.extension.getAllAcounts());
+          })
+          .catch(err => { 
+              console.error(err);
+          });
       })
       .catch(err => {
         console.error(err);
@@ -99,16 +100,17 @@ function App() {
     contract.extension.setAccount(account.address).then(async (account) => {
       setAccount(account);
       console.log("ACCOUNT", account.address);
-      // const contract = new ProsopoContract(new HttpProvider(), account.address);
-      await contract.creationPromise();
-      const randomProvider = await contract.getRandomProvider();
+      const randomProvider = await contract.getRandomProvider(account.address);
       console.log("PROVIDER", randomProvider);
-      // const captchaPuzzle = await providerApi.getCaptchaPuzzle(
-      //   randomProvider.provider.captcha_dataset_id,
-      //   randomProvider.provider.service_origin,
-      //   randomProvider.block_number
-      // );
-      // console.log(captchaPuzzle);
+      if (!randomProvider) {
+        throw new Error("No random provider");
+      }
+      const captchaPuzzle = await providerApi.getCaptchaPuzzle(
+        randomProvider.provider.captchaDatasetId,
+        randomProvider.provider.serviceOrigin,
+        randomProvider.blockNumber
+      );
+      console.log("CAPTCHA PUZZLE", captchaPuzzle);
     });
   };
 
