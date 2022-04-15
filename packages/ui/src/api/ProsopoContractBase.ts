@@ -3,7 +3,7 @@ import { Abi, ContractPromise } from "@polkadot/api-contract";
 import abiJson from "../abi/prosopo.json";
 import { AnyJson } from "@polkadot/types/types/codec";
 import { ProviderInterface } from "@polkadot/rpc-provider/types";
-import { unwrap, encodeStringArgs } from "@prosopo/contract";
+import { unwrap, encodeStringArgs } from "../common/helpers";
 import Extension, { NoExtensionCallback } from "./Extension";
 class ProsopoContractBase {
   protected api: ApiPromise;
@@ -50,7 +50,7 @@ class ProsopoContractBase {
     }
   }
 
-  public async query(method: string, args: any[]): Promise<AnyJson | null> {
+  public async query<T>(method: string, args: any[]): Promise<T | AnyJson | null> {
     try {
       this.throwIfNotReady();
       const abiMessage = this.abi.findMessage(method);
@@ -71,7 +71,7 @@ class ProsopoContractBase {
         );
       }
     } catch (e) {
-      console.log(["ERROR", e]);
+      console.error("ERROR", e);
       return null;
     }
   }

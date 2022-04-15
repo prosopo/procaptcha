@@ -1,11 +1,9 @@
 import ProsopoContractBase from "./ProsopoContractBase";
 
-
-// TODO: import return types from provider
+// TODO: import return types from provider: separate types/common package.
 class ProsopoContract extends ProsopoContractBase {
-    public getRandomProvider() {
-        const userAccount = this.extension.getAccount().address;
-        return this.query('getRandomActiveProvider', [userAccount]);
+    public async getRandomProvider(userAccount?: string): Promise<ProsopoRandomProviderResponse | null> {
+        return await this.query('getRandomActiveProvider', [userAccount || this.extension.getAccount().address]) as ProsopoRandomProviderResponse;
     }
 }
 

@@ -1,6 +1,7 @@
-import React, { useState, useEffect, SyntheticEvent } from "react";
+import React, { useState, useEffect, useMemo, SyntheticEvent } from "react";
 import "./App.css";
 import ProsopoContract from "./api/ProsopoContract";
+import { getProsopoContract } from "./api";
 import ProviderApi from "./api/providerApi";
 import { HttpProvider } from "@polkadot/rpc-provider";
 import {
@@ -16,24 +17,41 @@ import { InjectedAccountWithMeta } from "@polkadot/extension-inject/types";
 
 import CaptchaPuzzle from "./mockedResponses/captchaPuzzle.json";
 
-const contract = new ProsopoContract(
-  new HttpProvider(),
-  "5GVfbq41QmCu4kN9Lx6EGgtzD1MN5YeP4rJRYhKyVBXv8dcw"
-);
-
-const providerApi = new ProviderApi("http://localhost:3000");
-
-declare type UserData = InjectedAccountWithMeta | null | undefined;
+const providerApi = new ProviderApi("http://localhost:3000", "/v1/prosopo");
 
 function App() {
-  const [account, setAccount] = useState<UserData | null>(null);
   const classes = useStyles();
+
+  const [contract, setContract] = useState<ProsopoContract | null>(null);
+  const [accounts, setAccounts] = useState<InjectedAccountWithMeta[]>([]);
+  const [account, setAccount] = useState<InjectedAccountWithMeta | null>(null);
+
   const [showCaptchas, setShowCaptchas] = useState(false);
   const [totalNumberOfCaptchas, setTotalNumberOfCaptchas] = useState(0);
   const [currentCaptchaIndex, setCurrentCaptchaIndex] = useState(0);
 
-  const accounts = contract.extension?.getAllAcounts();
+  // const accounts = contract.extension?.getAllAcounts();
   const captchas = CaptchaPuzzle.captchas;
+
+  useEffect(() => {
+    providerApi.getContractAddress()
+      .then(address => {
+        console.log("ADDRESS", address.contractAddress);
+        getProsopoContract(address.contractAddress)
+          .then(contract => {
+              console.log("CONTRACT", contract);
+              setContract(contract);
+              setAccounts(contract.extension.getAllAcounts());
+          })
+          .catch(err => { 
+              console.error(err);
+          });
+      })
+      .catch(err => {
+        console.error(err);
+      });
+
+  }, []);
 
   useEffect(() => {
     setTotalNumberOfCaptchas(captchas.length);
@@ -76,16 +94,23 @@ function App() {
   // }
 
   const accountOnChange = (e: SyntheticEvent<Element, Event>, account: any) => {
+    if (!contract) {
+      return;
+    }
     contract.extension.setAccount(account.address).then(async (account) => {
       setAccount(account);
-      const randomProvider: any = await providerApi.getRandomProvider();
-      console.log(randomProvider);
+      console.log("ACCOUNT", account.address);
+      const randomProvider = await contract.getRandomProvider(account.address);
+      console.log("PROVIDER", randomProvider);
+      if (!randomProvider) {
+        throw new Error("No random provider");
+      }
       const captchaPuzzle = await providerApi.getCaptchaPuzzle(
-        randomProvider.provider.captcha_dataset_id,
-        randomProvider.provider.service_origin,
-        randomProvider.block_number
+        randomProvider.provider.captchaDatasetId,
+        randomProvider.provider.serviceOrigin,
+        randomProvider.blockNumber
       );
-      console.log(captchaPuzzle);
+      console.log("CAPTCHA PUZZLE", captchaPuzzle);
     });
   };
 
