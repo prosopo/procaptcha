@@ -31,8 +31,7 @@ function App() {
     const [showCaptchas, setShowCaptchas] = useState(false);
     const [totalNumberOfCaptchas, setTotalNumberOfCaptchas] = useState(0);
     const [currentCaptchaIndex, setCurrentCaptchaIndex] = useState(0);
-
-    const accounts = contract.extension?.getAllAcounts();
+    const [accounts, setAccounts] = useState<UserData[]>([])
     const captchas = CaptchaPuzzle.captchas;
 
     useEffect(() => {
@@ -65,19 +64,22 @@ function App() {
     };
 
     // useEffect(() => {
-    //   contract
-    //     .creationPromise()
-    //     .then(() => {
-    //       setAccount(contract.extension.getAccount());
-    //     })
-    //     .catch((err) => {
-    //       console.log(err);
-    //     });
+    //     contract
+    //         .creationPromise()
+    //         .then(() => {
+    //             setAccounts(contract.extension.getAllAcounts())
+    //             //setAccount(contract.extension.getAccount())
+    //         })
+    //         .catch((err) => {
+    //             console.log(err);
+    //         });
     // }, []);
 
-    // if (!account) {
-    //   return null;
-    // }
+    if (!account) {
+        console.log(`account is ${account}`)
+        console.log(`showCaptchas is ${showCaptchas}`)
+        return null;
+    }
 
     const accountOnChange = (e: SyntheticEvent<Element, Event>, account: any) => {
         contract.extension.setAccount(account.address).then(async (account) => {
@@ -98,7 +100,11 @@ function App() {
     // };
 
     return (
+
         <Box className={classes.root}>
+            <div>Show me this, please!</div>
+            {console.log(showCaptchas)}
+            {console.log(account)}
             {showCaptchas && !account && (
                 <Autocomplete
                     disablePortal
@@ -167,7 +173,7 @@ function App() {
                 </Box>
             )}
 
-            {!showCaptchas && !account && (
+            {!showCaptchas && (
                 <div>
                     <Button
                         onClick={toggleShowCaptchas}
