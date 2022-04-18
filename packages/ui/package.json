@@ -60,7 +60,7 @@
   },
   "scripts": {
     "start": "yarn webpack-cli serve --config webpack.serve.cjs --port 3001",
-    "build": "react-app-rewired build",
+    "build": "yarn webpack-cli build --config webpack.serve.cjs",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject"
   },
