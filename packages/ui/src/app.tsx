@@ -15,9 +15,30 @@ import {
 import { useStyles } from "./app.styles";
 import { InjectedAccountWithMeta } from "@polkadot/extension-inject/types";
 
-import CaptchaPuzzle from "./mockedResponses/captchaPuzzle.json";
+// import CaptchaPuzzle from "./mockedResponses/captchaPuzzle.json";
 
 const providerApi = new ProviderApi("http://localhost:3000", "/v1/prosopo");
+
+// TODO component
+function CaptchaWidget({ challenge, solution, solutionClickEvent}: 
+  {challenge: ProsopoCaptcha, solution: number[], solutionClickEvent: (index: number) => void}) {
+  // TODO challenge.items
+  const items = Array.from(Array(9).keys());
+
+  const classes = useStyles();
+
+  return (
+    <>
+      {items.map((item, index) => <Avatar
+        key={index}
+        src="/" // TODO challenge.items[].path...
+        variant="square"
+        className={classes.captchaItem + " " + (solution.includes(index) ? " selected" : "")}
+        onClick={() => solutionClickEvent(index)} />
+      )}
+    </>
+  );
+}
 
 function App() {
   const classes = useStyles();
@@ -31,7 +52,10 @@ function App() {
   const [currentCaptchaIndex, setCurrentCaptchaIndex] = useState(0);
 
   // const accounts = contract.extension?.getAllAcounts();
-  const captchas = CaptchaPuzzle.captchas;
+  const [captchaChallenge, setCaptchaChallenge] = useState<ProsopoCaptchaResponse | null>(null);
+
+  const [captchaSolution, setCaptchaSolution] = useState<number[]>([]);
+
 
   useEffect(() => {
     providerApi.getContractAddress()
@@ -54,8 +78,8 @@ function App() {
   }, []);
 
   useEffect(() => {
-    setTotalNumberOfCaptchas(captchas.length);
-  }, [captchas]);
+    setTotalNumberOfCaptchas(captchaChallenge?.captchas.length ?? 0);
+  }, [captchaChallenge]);
 
   const toggleShowCaptchas = () => {
     setShowCaptchas(!showCaptchas);
@@ -105,14 +129,20 @@ function App() {
       if (!randomProvider) {
         throw new Error("No random provider");
       }
-      const captchaPuzzle = await providerApi.getCaptchaPuzzle(
-        randomProvider.provider.captchaDatasetId,
-        randomProvider.provider.serviceOrigin,
-        randomProvider.blockNumber
-      );
-      console.log("CAPTCHA PUZZLE", captchaPuzzle);
+      const captchaPuzzle: ProsopoCaptchaResponse = await providerApi.getCaptchaChallenge(randomProvider);
+      console.log("CAPTCHA", captchaPuzzle);
+      setCaptchaChallenge(captchaPuzzle);
     });
   };
+
+  const onCaptchaSolutionClick = (index: number) => {
+    console.log("CLICK SOLUTION", index);
+    if (captchaSolution.includes(index)) {
+      setCaptchaSolution(captchaSolution.filter(item => item !== index));
+    } else {
+      setCaptchaSolution([...captchaSolution, index]);
+    }
+  }
 
   // const onClick = () => {
   //   const provider = contract.getRandomProvider();
@@ -149,30 +179,23 @@ function App() {
           </Box>
 
           <Box className={classes.captchasBody}>
-            {Array.from(Array(9).keys()).map((item, index) => {
-              return (
-                <Avatar
-                  key={index}
-                  src="/"
-                  variant="square"
-                  className={classes.captchaItem}
-                />
-              );
-            })}
+
+            {captchaChallenge && <CaptchaWidget challenge={captchaChallenge[currentCaptchaIndex]} solution={captchaSolution} solutionClickEvent={onCaptchaSolutionClick} />}
 
             <Box className={classes.dotsContainer}>
-              {Array.from(Array(totalNumberOfCaptchas).keys()).map((item) => {
+              {Array.from(Array(totalNumberOfCaptchas).keys()).map((item, index) => {
                 return (
                   <Box
+                    key={index}
                     className={classes.dot}
                     style={{
-                      backgroundColor:
-                        currentCaptchaIndex === item ? "#CFCFCF" : "#FFFFFF"
+                      backgroundColor: currentCaptchaIndex === item ? "#CFCFCF" : "#FFFFFF"
                     }}
                   />
                 );
               })}
             </Box>
+
           </Box>
 
           <Box className={classes.captchasFooter}>

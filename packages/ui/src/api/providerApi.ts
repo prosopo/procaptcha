@@ -20,17 +20,12 @@ class ProviderApi extends HttpClientBase {
     return this.instance.get(`/providers/`);
   }
 
-  public getCaptchaPuzzle(
-    datasetId: string,
-    userAccount: string,
-    blockNumber: string
-  ) {
-    return this.instance.get(
-      `/provider/captcha/${datasetId}/${userAccount}/${parseInt(
-        blockNumber.replace(/,/g, "")
-      )}`
-    );
+  public getCaptchaChallenge(randomProvider: ProsopoRandomProviderResponse) : Promise<ProsopoCaptchaResponse> {
+    let { provider, blockNumber } = randomProvider;
+    blockNumber = blockNumber.replace(/,/g, ''); // TODO: middleware schema parser/validator.
+    return this.instance.get(`/provider/captcha/${provider.captchaDatasetId}/${provider.serviceOrigin}/${blockNumber}`);
   }
+
 }
 
 export default ProviderApi;
