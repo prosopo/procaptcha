@@ -45,5 +45,10 @@
     ".cache",
     "build/**/*",
     "**/build/**/*"
+  ],
+  "references": [
+    {
+      "path": "../provider/packages/contract"
+    }
   ]
 }

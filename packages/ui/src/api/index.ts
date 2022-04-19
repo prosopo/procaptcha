@@ -1,13 +1,20 @@
+import {
+  web3Accounts,
+  web3Enable,
+  web3FromSource,
+} from "@polkadot/extension-dapp";
+import { HttpProvider } from "@polkadot/rpc-provider";
+import { blake2AsHex } from "@polkadot/util-crypto";
 import ProsopoContract from "./ProsopoContract";
-import {createNetwork} from "@prosopo/contract";
-import abiJson from "../abi/prosopo.json";
 
 export async function extensionTest() {
-  const networkConfig = {'endpoint': 'ws://0.0.0.0:9944'}
-  const network = createNetwork('', networkConfig)
-  const contract = new ProsopoContract(process.env.CONTRACT_ADDRESS || '', abiJson, network);
-  await contract.creationPromise()
-  console.log(await contract.getRandomProvider());
+  const contract = new ProsopoContract(new HttpProvider(), "5EFDQKSZeWLNZySoHb1JGT89AajKJECmBnZ7HasdYWqbyeaT");
+  await contract.creationPromise();
+
+  // console.log(await contract.getRandomProvider());
+
+  // console.log(blake2AsHex("http://localhost:8282"))
+  // console.log(await contract.transaction("providerRegister", [blake2AsHex("http://localhost:8282"), 0, "Provider", "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"]))
 }
 
 

@@ -1,5 +1,6 @@
-import React, { useState, useEffect, SyntheticEvent } from "react";
+import React, { useState, useEffect, useMemo, SyntheticEvent } from "react";
 import { InjectedAccountWithMeta } from "@polkadot/extension-inject/types";
+// import { HttpProvider } from "@polkadot/rpc-provider";
 import {
   Box,
   Button,
@@ -7,19 +8,17 @@ import {
   Autocomplete,
   TextField
 } from "@mui/material";
-import abiJson from "./abi/prosopo.json";
+
 import config from "./config";
+import { getProsopoContract } from "./api";
 import ProsopoContract from "./api/ProsopoContract";
 import { getCaptchaChallenge } from "./components/captcha";
 import { CaptchaWidget } from "./components/CaptchaWidget";
-import { createNetwork } from '@prosopo/contract'
+
 import "./App.css";
 import { useStyles } from "./app.styles";
 
-const networkConfig = {'endpoint': 'ws://0.0.0.0:9944'}
-const network = createNetwork('', networkConfig)
-
-
+// import CaptchaPuzzle from "./mockedResponses/captchaPuzzle.json";
 
 const { providerApi } = config;
 
@@ -45,15 +44,15 @@ function App() {
     providerApi.getContractAddress()
       .then(address => {
         console.log("ADDRESS", address.contractAddress);
-        const contract = new ProsopoContract(address.contractAddress, abiJson, network);
-        contract.creationPromise().then(() => {
-          console.log("CONTRACT", contract);
-          setContract(contract);
-          setAccounts(contract.extension.getAllAcounts());
-        })
-        .catch(err => {
-            console.error(err);
-        });
+        getProsopoContract(address.contractAddress)
+          .then(contract => {
+              console.log("CONTRACT", contract);
+              setContract(contract);
+              setAccounts(contract.extension.getAllAcounts());
+          })
+          .catch(err => { 
+              console.error(err);
+          });
       })
       .catch(err => {
         console.error(err);
