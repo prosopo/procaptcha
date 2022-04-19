@@ -10,14 +10,6 @@ class ProsopoContractBase {
   protected api: ApiPromise;
   protected abi: Abi;
   protected contract: ContractPromise;
-  // protected isReady = false;
-  // protected initPromise: Promise<void>;
-
-  // protected contractAddress: string;
-  // protected accountAddress: string;
-  // protected signer: Signer;
-  // public extension: Extension;
-
 
   constructor() {
     throw new Error("Use `create` factory method");
@@ -41,8 +33,6 @@ class ProsopoContractBase {
 
   public async query<T>(address: string, method: string, args: any[]): Promise<T | AnyJson | null> {
     try {
-      // this.throwIfNotReady();
-      // this.throwIfNotAccount();
       const abiMessage = this.abi.findMessage(method);
       const response = await this.contract.query[method](
         address,
@@ -68,7 +58,6 @@ class ProsopoContractBase {
 
   public async transaction<T>(signer: Signer, method: string, args: any[]): Promise<T | AnyJson | null | any> {
     try {
-      // this.throwIfNotReady();
       const abiMessage = this.abi.findMessage(method);
       const extrinsic = this.contract.tx[method](
         {},

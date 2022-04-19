@@ -13,6 +13,7 @@ import storage from "../modules/storage";
 export type NoExtensionCallback = () => void | Promise<void>;
 
 class Extension {
+
     private account: InjectedAccountWithMeta;
     private injected: InjectedExtension;
     private allAccounts: InjectedAccountWithMeta[];
