@@ -10,9 +10,9 @@ import {
 } from "@mui/material";
 
 import config from "./config";
-import { getProsopoContract } from "./api";
 import ProsopoContract from "./api/ProsopoContract";
-import { getCaptchaChallenge } from "./components/captcha";
+import { getProsopoContract } from "./modules/contract";
+import { getCaptchaChallenge } from "./modules/captcha";
 import { CaptchaWidget } from "./components/CaptchaWidget";
 
 import "./App.css";
@@ -23,6 +23,7 @@ import { useStyles } from "./app.styles";
 const { providerApi } = config;
 
 function App() {
+
   const classes = useStyles();
 
   const [contract, setContract] = useState<ProsopoContract | null>(null);
@@ -34,10 +35,9 @@ function App() {
   const [currentCaptchaIndex, setCurrentCaptchaIndex] = useState(0);
 
   // let currentCaptcha: ProsopoCaptcha | undefined;
-
   // const accounts = contract.extension?.getAllAcounts();
-  const [captchaChallenge, setCaptchaChallenge] = useState<ProsopoCaptchaResponse | null>(null);
 
+  const [captchaChallenge, setCaptchaChallenge] = useState<ProsopoCaptchaResponse | null>(null);
   const [captchaSolution, setCaptchaSolution] = useState<number[]>([]);
 
   useEffect(() => {

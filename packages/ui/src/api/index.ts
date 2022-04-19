@@ -16,12 +16,3 @@ export async function extensionTest() {
   // console.log(blake2AsHex("http://localhost:8282"))
   // console.log(await contract.transaction("providerRegister", [blake2AsHex("http://localhost:8282"), 0, "Provider", "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"]))
 }
-
-
-export async function getProsopoContract(contractAddress: string) {
-
-  const contract = new ProsopoContract(new HttpProvider(), contractAddress);
-  await contract.creationPromise();
-
-  return contract;
-}

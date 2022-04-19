@@ -5,7 +5,7 @@ import {
 } from "@polkadot/extension-dapp";
 import { InjectedAccountWithMeta, InjectedExtension } from "@polkadot/extension-inject/types"
 import { SignerPayloadRaw } from "@polkadot/types/types";
-import storage from "./storage";
+import storage from "../modules/storage";
 
 /**
  * type for callback when no extension was found

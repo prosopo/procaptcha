@@ -1,5 +1,5 @@
-import HttpClientBase from "./httpClientBase";
-import Storage from "./storage";
+import HttpClientBase from "./HttpClientBase";
+import Storage from "../modules/storage";
 
 class ProviderApi extends HttpClientBase {
 

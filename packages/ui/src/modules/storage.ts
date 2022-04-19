@@ -14,9 +14,7 @@ function getAccount() {
     return localStorage.getItem(CURRENT_ACCOUNT_KEY);
 }
 
-const storage = {
+export default {
     setAccount,
     getAccount
 }
-
-export default storage;
