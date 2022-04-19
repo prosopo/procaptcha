@@ -26,6 +26,10 @@ class ProviderApi extends HttpClientBase {
     return this.instance.get(`/provider/captcha/${provider.captchaDatasetId}/${provider.serviceOrigin}/${blockNumber}`);
   }
 
+  public submitCaptchaSolution(blockHash: string, captchas: number[], dappAccount: string, requestHash: string, txHash: string, userAccount: string) : Promise<any> {
+    return this.instance.post(`/provider/captcha/solution`, {blockHash, captchas, dappAccount, requestHash, txHash, userAccount});
+  }
+
 }
 
 export default ProviderApi;

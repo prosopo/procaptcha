@@ -1,5 +1,11 @@
-import ProsopoContract from "../api/ProsopoContract";
 import { InjectedAccountWithMeta } from "@polkadot/extension-inject/types";
+import {randomAsHex} from '@polkadot/util-crypto';
+
+import ProsopoContract from "../api/ProsopoContract";
+
+// TODO import {CaptchaMerkleTree} from '@prosopo/provider-core/merkle';
+// import {computeCaptchaSolutionHash, computePendingRequestHash, parseCaptchaDataset} from '../../src/captcha';
+
 import config from "../config";
 
 const { providerApi } = config;
@@ -15,3 +21,13 @@ export const getCaptchaChallenge = async (contract: ProsopoContract, account: In
     console.log("CAPTCHA", captchaPuzzle);
     return captchaPuzzle;
 }
+
+// export const solveCaptchaChallenge = async (captchaId: string, solution: number[]) : Promise<any> => {
+//     const salt = randomAsHex();
+//     const tree = new CaptchaMerkleTree();
+//     const captchaSolutionsSalted = [{ captchaId, solution, salt }];
+//     const captchasHashed = captchaSolutionsSalted.map((captcha) => computeCaptchaSolutionHash(captcha));
+
+//     tree.build(captchasHashed);
+//     const commitmentId = tree.root!.hash;
+// }
