@@ -7,6 +7,7 @@ import { unwrap, encodeStringArgs } from "../common/helpers";
 import Extension, { NoExtensionCallback } from "./Extension";
 import { Signer } from "@polkadot/api/types";
 class ProsopoContractBase {
+
   protected api: ApiPromise;
   protected abi: Abi;
   protected contract: ContractPromise;
@@ -31,11 +32,11 @@ class ProsopoContractBase {
     this.contract = new ContractPromise(this.api, this.abi, address);
   }
 
-  public async query<T>(address: string, method: string, args: any[]): Promise<T | AnyJson | null> {
+  public async query<T>(user: string, method: string, args: any[]): Promise<T | AnyJson | null> {
     try {
       const abiMessage = this.abi.findMessage(method);
       const response = await this.contract.query[method](
-        address,
+        user,
         {},
         ...encodeStringArgs(abiMessage, args)
       );
