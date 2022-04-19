@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, SyntheticEvent } from "react";
+import React, { useState, useEffect, SyntheticEvent } from "react";
 import { InjectedAccountWithMeta } from "@polkadot/extension-inject/types";
 import {
   Box,
@@ -7,7 +7,7 @@ import {
   Autocomplete,
   TextField
 } from "@mui/material";
-
+import abiJson from "./abi/prosopo.json";
 import config from "./config";
 import ProsopoContract from "./api/ProsopoContract";
 import { getCaptchaChallenge } from "./components/captcha";
