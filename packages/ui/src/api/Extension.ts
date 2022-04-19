@@ -93,8 +93,9 @@ class Extension {
         return this.account;
     }
 
-    public getAllAcounts() {
+    public getAllAcounts(): InjectedAccountWithMeta[] {
         this.throwIfNotReady();
+        console.log(this.allAccounts)
         return this.allAccounts;
     }
 

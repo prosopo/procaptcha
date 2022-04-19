@@ -4,9 +4,9 @@ import CssBaseline from "@mui/material/CssBaseline";
 import App from "./app";
 
 ReactDOM.render(
-  <React.StrictMode>
-    <CssBaseline />
-    <App />
-  </React.StrictMode>,
-  document.getElementById("root")
+    <React.StrictMode>
+        <CssBaseline />
+        <App />
+    </React.StrictMode>,
+    document.getElementById("root")
 );
