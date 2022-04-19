@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo, SyntheticEvent } from "react";
 import { InjectedAccountWithMeta } from "@polkadot/extension-inject/types";
-// import { HttpProvider } from "@polkadot/rpc-provider";
 import {
   Box,
   Button,
@@ -10,11 +9,10 @@ import {
 } from "@mui/material";
 
 import config from "./config";
-import { getProsopoContract } from "./api";
 import ProsopoContract from "./api/ProsopoContract";
 import { getCaptchaChallenge } from "./components/captcha";
 import { CaptchaWidget } from "./components/CaptchaWidget";
-
+import { createNetwork } from '@prosopo/contract'
 import "./App.css";
 import { useStyles } from "./app.styles";
 
