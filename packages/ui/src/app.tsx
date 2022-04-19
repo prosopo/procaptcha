@@ -11,7 +11,8 @@ import {
 
 import config from "./config";
 import ProsopoContract from "./api/ProsopoContract";
-import { getProsopoContract } from "./modules/contract";
+import Extension from "./api/Extension";
+import { getProsopoContract, getExtension } from "./modules/contract";
 import { getCaptchaChallenge } from "./modules/captcha";
 import { CaptchaWidget } from "./components/CaptchaWidget";
 
@@ -27,7 +28,9 @@ function App() {
   const classes = useStyles();
 
   const [contract, setContract] = useState<ProsopoContract | null>(null);
-  const [accounts, setAccounts] = useState<InjectedAccountWithMeta[]>([]);
+  const [extension, setExtension] = useState<Extension | null>(null);
+
+  // const [accounts, setAccounts] = useState<InjectedAccountWithMeta[]>([]);
   const [account, setAccount] = useState<InjectedAccountWithMeta | null>(null);
 
   const [showCaptchas, setShowCaptchas] = useState(false);
@@ -44,11 +47,13 @@ function App() {
     providerApi.getContractAddress()
       .then(address => {
         console.log("ADDRESS", address.contractAddress);
-        getProsopoContract(address.contractAddress)
-          .then(contract => {
-              console.log("CONTRACT", contract);
-              setContract(contract);
-              setAccounts(contract.extension.getAllAcounts());
+        Promise.all([getProsopoContract(address.contractAddress), getExtension()])
+          .then(result => {
+              const [_contract, _extension] = result;
+              console.log("CONTRACT", _contract);
+              setContract(_contract);
+              setExtension(_extension);
+              // setAccounts(_extension.getAllAcounts());
           })
           .catch(err => { 
               console.error(err);
@@ -81,6 +86,12 @@ function App() {
   };
 
   const submitCaptchaHandler = () => {
+    if (!extension) {
+      return;
+    }
+
+    console.log("SIGNER", extension.getInjected().signer);
+
     if (currentCaptchaIndex === totalNumberOfCaptchas - 1) {
       setShowCaptchas(!showCaptchas);
       setAccount(null);
@@ -106,11 +117,12 @@ function App() {
   // }
 
   const onAccountChange = (e: SyntheticEvent<Element, Event>, account: any) => {
-    if (!contract) {
+    if (!contract || !extension) {
       return;
     }
-    contract.extension.setAccount(account.address).then(async (account) => {
+    extension.setAccount(account.address).then(async (account) => {
       setAccount(account);
+      // contract.setAccountAddress(account.address);
       setCaptchaChallenge(await getCaptchaChallenge(contract, account));
     });
   };
@@ -130,7 +142,7 @@ function App() {
         <Autocomplete
           disablePortal
           id="select-accounts"
-          options={accounts}
+          options={extension?.getAllAcounts() || []}
           value={account}
           isOptionEqualToValue={(option, value) =>
             option.address === value.address
