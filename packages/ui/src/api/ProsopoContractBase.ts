@@ -10,66 +10,38 @@ class ProsopoContractBase {
   protected api: ApiPromise;
   protected abi: Abi;
   protected contract: ContractPromise;
-  protected isReady = false;
-  protected initPromise: Promise<void>;
+  // protected isReady = false;
+  // protected initPromise: Promise<void>;
 
   // protected contractAddress: string;
   // protected accountAddress: string;
   // protected signer: Signer;
   // public extension: Extension;
 
+
+  constructor() {
+    throw new Error("Use `create` factory method");
+  }
+
+  public static async create(...args: any[]) {
+    const _self = Object.create(this.prototype);
+    _self.init(...args);
+    return _self;
+  }
+
   /**
    * @param provider
-   * @param contractAddress
-   * @param noExtCb - callback when no extension was found
+   * @param address
    */
-  constructor(provider: ProviderInterface, contractAddress: string, accountAddress?: string) {
-    
-    // this.contractAddress = contractAddress;
-    // this.setAccountAddress(accountAddress);
-
-    this.initPromise = new Promise(async (resolve) => {
-      this.api = await ApiPromise.create({ provider });
-      this.abi = new Abi(abiJson, this.api.registry.getChainProperties());
-      this.contract = new ContractPromise(this.api, this.abi, contractAddress);
-      // this.extension = new Extension(noExtCb);
-      // await this.extension.creationPromise();
-      this.isReady = true;
-      resolve();
-    });
+  protected async init(provider: ProviderInterface, address: string) {
+    this.api = await ApiPromise.create({ provider });
+    this.abi = new Abi(abiJson, this.api.registry.getChainProperties());
+    this.contract = new ContractPromise(this.api, this.abi, address);
   }
-
-  // public setAccountAddress(accountAddress?: string) {
-  //   if (accountAddress) {
-  //     this.accountAddress = accountAddress;
-  //   }
-  // }
-
-  /**
-   * await this to make sure creation completes
-   */
-  public async creationPromise() {
-    await this.initPromise;
-    return;
-  }
-
-  protected throwIfNotReady() {
-    if (!this.isReady) {
-      throw new Error(
-        "Contract not ready. Try doing: 'await creationPromise()'"
-      );
-    }
-  }
-
-  // protected throwIfNotAccount() {
-  //   if (!this.accountAddress) {
-  //     throw new Error('setAccountAddress() must be called before this');
-  //   }
-  // }
 
   public async query<T>(address: string, method: string, args: any[]): Promise<T | AnyJson | null> {
     try {
-      this.throwIfNotReady();
+      // this.throwIfNotReady();
       // this.throwIfNotAccount();
       const abiMessage = this.abi.findMessage(method);
       const response = await this.contract.query[method](
@@ -96,7 +68,7 @@ class ProsopoContractBase {
 
   public async transaction<T>(signer: Signer, method: string, args: any[]): Promise<T | AnyJson | null | any> {
     try {
-      this.throwIfNotReady();
+      // this.throwIfNotReady();
       const abiMessage = this.abi.findMessage(method);
       const extrinsic = this.contract.tx[method](
         {},

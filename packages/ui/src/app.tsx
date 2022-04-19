@@ -10,16 +10,17 @@ import {
 } from "@mui/material";
 
 import config from "./config";
+
 import ProsopoContract from "./api/ProsopoContract";
 import Extension from "./api/Extension";
-import { getProsopoContract, getExtension } from "./modules/contract";
+
+import { getExtension } from "./modules/extension";
+import { getProsopoContract } from "./modules/contract";
 import { getCaptchaChallenge } from "./modules/captcha";
 import { CaptchaWidget } from "./components/CaptchaWidget";
 
 import "./App.css";
 import { useStyles } from "./app.styles";
-
-// import CaptchaPuzzle from "./mockedResponses/captchaPuzzle.json";
 
 const { providerApi } = config;
 
