@@ -1,23 +1,27 @@
-import React, { useState, useEffect, useMemo, SyntheticEvent } from "react";
-import "./App.css";
-import ProsopoContract from "./api/ProsopoContract";
-import { getProsopoContract } from "./api";
-import ProviderApi from "./api/providerApi";
-import { HttpProvider } from "@polkadot/rpc-provider";
+import React, { useState, useEffect, SyntheticEvent } from "react";
+import { InjectedAccountWithMeta } from "@polkadot/extension-inject/types";
 import {
-  Avatar,
   Box,
   Button,
   Typography,
   Autocomplete,
   TextField
 } from "@mui/material";
+import abiJson from "./abi/prosopo.json";
+import config from "./config";
+import ProsopoContract from "./api/ProsopoContract";
+import { getCaptchaChallenge } from "./components/captcha";
+import { CaptchaWidget } from "./components/CaptchaWidget";
+import { createNetwork } from '@prosopo/contract'
+import "./App.css";
 import { useStyles } from "./app.styles";
-import { InjectedAccountWithMeta } from "@polkadot/extension-inject/types";
 
-import CaptchaPuzzle from "./mockedResponses/captchaPuzzle.json";
+const networkConfig = {'endpoint': 'ws://0.0.0.0:9944'}
+const network = createNetwork('', networkConfig)
 
-const providerApi = new ProviderApi("http://localhost:3000", "/v1/prosopo");
+
+
+const { providerApi } = config;
 
 function App() {
   const classes = useStyles();
@@ -30,22 +34,26 @@ function App() {
   const [totalNumberOfCaptchas, setTotalNumberOfCaptchas] = useState(0);
   const [currentCaptchaIndex, setCurrentCaptchaIndex] = useState(0);
 
+  // let currentCaptcha: ProsopoCaptcha | undefined;
+
   // const accounts = contract.extension?.getAllAcounts();
-  const captchas = CaptchaPuzzle.captchas;
+  const [captchaChallenge, setCaptchaChallenge] = useState<ProsopoCaptchaResponse | null>(null);
+
+  const [captchaSolution, setCaptchaSolution] = useState<number[]>([]);
 
   useEffect(() => {
     providerApi.getContractAddress()
       .then(address => {
         console.log("ADDRESS", address.contractAddress);
-        getProsopoContract(address.contractAddress)
-          .then(contract => {
-              console.log("CONTRACT", contract);
-              setContract(contract);
-              setAccounts(contract.extension.getAllAcounts());
-          })
-          .catch(err => { 
-              console.error(err);
-          });
+        const contract = new ProsopoContract(address.contractAddress, abiJson, network);
+        contract.creationPromise().then(() => {
+          console.log("CONTRACT", contract);
+          setContract(contract);
+          setAccounts(contract.extension.getAllAcounts());
+        })
+        .catch(err => {
+            console.error(err);
+        });
       })
       .catch(err => {
         console.error(err);
@@ -54,8 +62,13 @@ function App() {
   }, []);
 
   useEffect(() => {
-    setTotalNumberOfCaptchas(captchas.length);
-  }, [captchas]);
+    setTotalNumberOfCaptchas(captchaChallenge?.captchas.length ?? 0);
+    setCurrentCaptchaIndex(0);
+  }, [captchaChallenge]);
+
+  // useMemo(() => {
+  //   currentCaptcha = captchaChallenge?.captchas[currentCaptchaIndex];
+  // }, [currentCaptchaIndex]);
 
   const toggleShowCaptchas = () => {
     setShowCaptchas(!showCaptchas);
@@ -93,30 +106,24 @@ function App() {
   //   return null;
   // }
 
-  const accountOnChange = (e: SyntheticEvent<Element, Event>, account: any) => {
+  const onAccountChange = (e: SyntheticEvent<Element, Event>, account: any) => {
     if (!contract) {
       return;
     }
     contract.extension.setAccount(account.address).then(async (account) => {
       setAccount(account);
-      console.log("ACCOUNT", account.address);
-      const randomProvider = await contract.getRandomProvider(account.address);
-      console.log("PROVIDER", randomProvider);
-      if (!randomProvider) {
-        throw new Error("No random provider");
-      }
-      const captchaPuzzle = await providerApi.getCaptchaPuzzle(
-        randomProvider.provider.captchaDatasetId,
-        randomProvider.provider.serviceOrigin,
-        randomProvider.blockNumber
-      );
-      console.log("CAPTCHA PUZZLE", captchaPuzzle);
+      setCaptchaChallenge(await getCaptchaChallenge(contract, account));
     });
   };
 
-  // const onClick = () => {
-  //   const provider = contract.getRandomProvider();
-  // };
+  const onCaptchaSolutionClick = (index: number) => {
+    console.log("CLICK SOLUTION", index);
+    if (captchaSolution.includes(index)) {
+      setCaptchaSolution(captchaSolution.filter(item => item !== index));
+    } else {
+      setCaptchaSolution([...captchaSolution, index]);
+    }
+  }
 
   return (
     <Box className={classes.root}>
@@ -129,7 +136,7 @@ function App() {
           isOptionEqualToValue={(option, value) =>
             option.address === value.address
           }
-          onChange={accountOnChange}
+          onChange={onAccountChange}
           sx={{ width: 550 }}
           getOptionLabel={(option: any) =>
             `${option.meta.name}\n${option.address}`
@@ -149,30 +156,23 @@ function App() {
           </Box>
 
           <Box className={classes.captchasBody}>
-            {Array.from(Array(9).keys()).map((item, index) => {
-              return (
-                <Avatar
-                  key={index}
-                  src="/"
-                  variant="square"
-                  className={classes.captchaItem}
-                />
-              );
-            })}
+
+            {captchaChallenge && <CaptchaWidget challenge={captchaChallenge[currentCaptchaIndex]} solution={captchaSolution} solutionClickEvent={onCaptchaSolutionClick} />}
 
             <Box className={classes.dotsContainer}>
-              {Array.from(Array(totalNumberOfCaptchas).keys()).map((item) => {
+              {Array.from(Array(totalNumberOfCaptchas).keys()).map((item, index) => {
                 return (
                   <Box
+                    key={index}
                     className={classes.dot}
                     style={{
-                      backgroundColor:
-                        currentCaptchaIndex === item ? "#CFCFCF" : "#FFFFFF"
+                      backgroundColor: currentCaptchaIndex === item ? "#CFCFCF" : "#FFFFFF"
                     }}
                   />
                 );
               })}
             </Box>
+
           </Box>
 
           <Box className={classes.captchasFooter}>

@@ -16,3 +16,20 @@ interface ProposoProvider {
   serviceOrigin: string;
   status: string; // TODO: enum
 }
+
+
+interface CaptchaSet {
+  captchaId: string;
+  datasetId: string;
+  // TODO items: {path, type}[];
+}
+
+interface ProsopoCaptcha {
+  captcha: CaptchaSet;
+  proof: string[][];
+}
+
+interface ProsopoCaptchaResponse {
+  captchas: ProsopoCaptcha[];
+  requestHash: string;
+}
