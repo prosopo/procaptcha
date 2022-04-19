@@ -16,12 +16,8 @@ import { createNetwork } from '@prosopo/contract'
 import "./App.css";
 import { useStyles } from "./app.styles";
 
-const networkConfig = {'endpoint': 'ws://0.0.0.0:9944'}
-const network = createNetwork('', networkConfig)
-
-
-
-const { providerApi } = config;
+const { providerApi, networkConfig } = config;
+const network = createNetwork('', networkConfig);
 
 function App() {
   const classes = useStyles();
