@@ -32,7 +32,21 @@
     "rootDir": "./",
     "outDir": "./build",
     "baseUrl": ".",
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "paths": {
+      "@prosopo/contract": [
+        "../provider/packages/contract/build/src"
+      ],
+      "@prosopo/contract/*": [
+        "../provider/packages/contract/build/src/*"
+      ],
+      "@prosopo/provider-core": [
+        "../provider/packages/core/build/src"
+      ],
+      "@prosopo/provider-core/*": [
+        "../provider/packages/core/build/src/*"
+      ]
+    }
   },
   "include": [
     "packages/**/*.ts",

@@ -3,8 +3,8 @@ import {randomAsHex} from '@polkadot/util-crypto';
 
 import ProsopoContract from "../api/ProsopoContract";
 
-// TODO import {CaptchaMerkleTree} from '@prosopo/provider-core/merkle';
-// import {computeCaptchaSolutionHash, computePendingRequestHash, parseCaptchaDataset} from '../../src/captcha';
+// import {CaptchaMerkleTree} from '@prosopo/provider-core/merkle';
+// import {computeCaptchaSolutionHash, computePendingRequestHash, parseCaptchaDataset} from '@prosopo/provider-core/captcha';
 
 import config from "../config";
 
