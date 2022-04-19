@@ -55,31 +55,31 @@ class ProsopoContractBase {
         }
     }
 
-    public async query(method: string, args: any[]): Promise<AnyJson | null> {
-        try {
-            this.throwIfNotReady();
-            const abiMessage: AbiMessage = this.abi.findMessage(method);
-            const response = await this.contract.query[method](
-                this.extension.getAccount().address,
-                {},
-                ...encodeStringArgs(abiMessage, args)
-            );
-            if (response.result.isOk) {
-                if (response.output) {
-                    return unwrap(response.output.toHuman());
-                } else {
-                    return null;
-                }
-            } else {
-                throw new Error(
-                    response.result.asErr.asModule.message.unwrap().toString()
-                );
-            }
-        } catch (e) {
-            console.log(["ERROR", e]);
-            return null;
+  public async query(method: string, args: any[]): Promise<AnyJson | null> {
+    try {
+      this.throwIfNotReady();
+      const abiMessage = this.abi.findMessage(method);
+      const response = await this.contract.query[method](
+        this.extension.getAccount().address,
+        {},
+        ...encodeStringArgs(abiMessage, args)
+      );
+      if (response.result.isOk) {
+        if (response.output) {
+          return unwrap(response.output.toHuman());
+        } else {
+          return null;
         }
+      } else {
+        throw new Error(
+          response.result.asErr.asModule.message.unwrap().toString()
+        );
+      }
+    } catch (e) {
+      console.log(["ERROR", e]);
+      return null;
     }
+  }
 
     public async transaction(method: string, args: any[]) {
         try {

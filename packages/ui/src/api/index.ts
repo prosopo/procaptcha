@@ -9,3 +9,12 @@ export async function extensionTest() {
   await contract.creationPromise()
   console.log(await contract.getRandomProvider());
 }
+
+
+export async function getProsopoContract(contractAddress: string) {
+
+  const contract = new ProsopoContract(new HttpProvider(), contractAddress);
+  await contract.creationPromise();
+
+  return contract;
+}

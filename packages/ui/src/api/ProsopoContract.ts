@@ -40,11 +40,6 @@ class ProsopoContract extends ProsopoContractApi {
         const userAccount = this.extension.getAccount().address;
         return this.contractQuery('getRandomActiveProvider', [userAccount]);
     }
-
-    public providerRegister(serviceOrigin, fee, payee, address) {
-        return this.contractTx('getRandomActiveProvider', [serviceOrigin, fee, payee, address]);
-    }
 }
-
 
 export default ProsopoContract;

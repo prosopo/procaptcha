@@ -148,7 +148,7 @@ function createWebpack (context, mode = 'production') {
             globalObject: '(typeof self !== \'undefined\' ? self : this)',
             hashFunction: 'xxhash64',
             path: path.join(context, 'build'),
-            publicPath: ''
+            publicPath: '',
         },
         performance: {
             hints: false
