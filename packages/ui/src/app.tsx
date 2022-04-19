@@ -1,44 +1,26 @@
 import React, { useState, useEffect, useMemo, SyntheticEvent } from "react";
-import "./App.css";
-import ProsopoContract from "./api/ProsopoContract";
-import { getProsopoContract } from "./api";
-import ProviderApi from "./api/providerApi";
-import { HttpProvider } from "@polkadot/rpc-provider";
+import { InjectedAccountWithMeta } from "@polkadot/extension-inject/types";
+// import { HttpProvider } from "@polkadot/rpc-provider";
 import {
-  Avatar,
   Box,
   Button,
   Typography,
   Autocomplete,
   TextField
 } from "@mui/material";
+
+import config from "./config";
+import { getProsopoContract } from "./api";
+import ProsopoContract from "./api/ProsopoContract";
+import { getCaptchaChallenge } from "./components/captcha";
+import { CaptchaWidget } from "./components/CaptchaWidget";
+
+import "./App.css";
 import { useStyles } from "./app.styles";
-import { InjectedAccountWithMeta } from "@polkadot/extension-inject/types";
 
 // import CaptchaPuzzle from "./mockedResponses/captchaPuzzle.json";
 
-const providerApi = new ProviderApi("http://localhost:3000", "/v1/prosopo");
-
-// TODO component
-function CaptchaWidget({ challenge, solution, solutionClickEvent}: 
-  {challenge: ProsopoCaptcha, solution: number[], solutionClickEvent: (index: number) => void}) {
-  // TODO challenge.items
-  const items = Array.from(Array(9).keys());
-
-  const classes = useStyles();
-
-  return (
-    <>
-      {items.map((item, index) => <Avatar
-        key={index}
-        src="/" // TODO challenge.items[].path...
-        variant="square"
-        className={classes.captchaItem + " " + (solution.includes(index) ? " selected" : "")}
-        onClick={() => solutionClickEvent(index)} />
-      )}
-    </>
-  );
-}
+const { providerApi } = config;
 
 function App() {
   const classes = useStyles();
@@ -51,11 +33,12 @@ function App() {
   const [totalNumberOfCaptchas, setTotalNumberOfCaptchas] = useState(0);
   const [currentCaptchaIndex, setCurrentCaptchaIndex] = useState(0);
 
+  // let currentCaptcha: ProsopoCaptcha | undefined;
+
   // const accounts = contract.extension?.getAllAcounts();
   const [captchaChallenge, setCaptchaChallenge] = useState<ProsopoCaptchaResponse | null>(null);
 
   const [captchaSolution, setCaptchaSolution] = useState<number[]>([]);
-
 
   useEffect(() => {
     providerApi.getContractAddress()
@@ -79,7 +62,12 @@ function App() {
 
   useEffect(() => {
     setTotalNumberOfCaptchas(captchaChallenge?.captchas.length ?? 0);
+    setCurrentCaptchaIndex(0);
   }, [captchaChallenge]);
+
+  // useMemo(() => {
+  //   currentCaptcha = captchaChallenge?.captchas[currentCaptchaIndex];
+  // }, [currentCaptchaIndex]);
 
   const toggleShowCaptchas = () => {
     setShowCaptchas(!showCaptchas);
@@ -117,21 +105,13 @@ function App() {
   //   return null;
   // }
 
-  const accountOnChange = (e: SyntheticEvent<Element, Event>, account: any) => {
+  const onAccountChange = (e: SyntheticEvent<Element, Event>, account: any) => {
     if (!contract) {
       return;
     }
     contract.extension.setAccount(account.address).then(async (account) => {
       setAccount(account);
-      console.log("ACCOUNT", account.address);
-      const randomProvider = await contract.getRandomProvider(account.address);
-      console.log("PROVIDER", randomProvider);
-      if (!randomProvider) {
-        throw new Error("No random provider");
-      }
-      const captchaPuzzle: ProsopoCaptchaResponse = await providerApi.getCaptchaChallenge(randomProvider);
-      console.log("CAPTCHA", captchaPuzzle);
-      setCaptchaChallenge(captchaPuzzle);
+      setCaptchaChallenge(await getCaptchaChallenge(contract, account));
     });
   };
 
@@ -144,10 +124,6 @@ function App() {
     }
   }
 
-  // const onClick = () => {
-  //   const provider = contract.getRandomProvider();
-  // };
-
   return (
     <Box className={classes.root}>
       {showCaptchas && !account && (
@@ -159,7 +135,7 @@ function App() {
           isOptionEqualToValue={(option, value) =>
             option.address === value.address
           }
-          onChange={accountOnChange}
+          onChange={onAccountChange}
           sx={{ width: 550 }}
           getOptionLabel={(option: any) =>
             `${option.meta.name}\n${option.address}`
