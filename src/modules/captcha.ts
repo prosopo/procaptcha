@@ -3,8 +3,8 @@ import {randomAsHex} from '@polkadot/util-crypto';
 
 import ProsopoContract from "../api/ProsopoContract";
 
-// import {CaptchaMerkleTree} from '@prosopo/provider-core/merkle';
-// import {computeCaptchaSolutionHash, computePendingRequestHash, parseCaptchaDataset} from '@prosopo/provider-core/captcha';
+import {CaptchaMerkleTree} from '@prosopo/provider-core';
+import {computeCaptchaSolutionHash, computePendingRequestHash, parseCaptchaDataset} from '@prosopo/provider-core';
 
 import config from "../config";
 
@@ -22,12 +22,12 @@ export const getCaptchaChallenge = async (contract: ProsopoContract, account: In
     return captchaPuzzle;
 }
 
-// export const solveCaptchaChallenge = async (captchaId: string, solution: number[]) : Promise<any> => {
-//     const salt = randomAsHex();
-//     const tree = new CaptchaMerkleTree();
-//     const captchaSolutionsSalted = [{ captchaId, solution, salt }];
-//     const captchasHashed = captchaSolutionsSalted.map((captcha) => computeCaptchaSolutionHash(captcha));
+export const solveCaptchaChallenge = async (captchaId: string, solution: number[]) : Promise<any> => {
+    const salt = randomAsHex();
+    const tree = new CaptchaMerkleTree();
+    const captchaSolutionsSalted = [{ captchaId, solution, salt }];
+    const captchasHashed = captchaSolutionsSalted.map((captcha) => computeCaptchaSolutionHash(captcha));
 
-//     tree.build(captchasHashed);
-//     const commitmentId = tree.root!.hash;
-// }
+    tree.build(captchasHashed);
+    const commitmentId = tree.root!.hash;
+}

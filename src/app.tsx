@@ -71,9 +71,9 @@ function App() {
     setCurrentCaptchaIndex(0);
   }, [captchaChallenge]);
 
-  // useMemo(() => {
-  //   currentCaptcha = captchaChallenge?.captchas[currentCaptchaIndex];
-  // }, [currentCaptchaIndex]);
+  useEffect(() => {
+    console.log("CLICK SOLUTION", captchaSolution);
+  }, [captchaSolution]);
 
   const toggleShowCaptchas = () => {
     setShowCaptchas(!showCaptchas);
@@ -102,20 +102,6 @@ function App() {
     }
   };
 
-  // useEffect(() => {
-  //   contract
-  //     .creationPromise()
-  //     .then(() => {
-  //       setAccount(contract.extension.getAccount());
-  //     })
-  //     .catch((err) => {
-  //       console.log(err);
-  //     });
-  // }, []);
-
-  // if (!account) {
-  //   return null;
-  // }
 
   const onAccountChange = (e: SyntheticEvent<Element, Event>, account: any) => {
     if (!contract || !extension) {
@@ -129,7 +115,6 @@ function App() {
   };
 
   const onCaptchaSolutionClick = (index: number) => {
-    console.log("CLICK SOLUTION", index);
     if (captchaSolution.includes(index)) {
       setCaptchaSolution(captchaSolution.filter(item => item !== index));
     } else {

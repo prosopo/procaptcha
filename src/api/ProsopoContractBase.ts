@@ -17,9 +17,7 @@ class ProsopoContractBase {
   }
 
   public static async create(...args: any[]) {
-    const _self = Object.create(this.prototype);
-    _self.init(...args);
-    return _self;
+    return await Object.create(this.prototype).init(...args);
   }
 
   /**
@@ -30,6 +28,7 @@ class ProsopoContractBase {
     this.api = await ApiPromise.create({ provider });
     this.abi = new Abi(abiJson, this.api.registry.getChainProperties());
     this.contract = new ContractPromise(this.api, this.abi, address);
+    return this;
   }
 
   public async query<T>(user: string, method: string, args: any[]): Promise<T | AnyJson | null> {

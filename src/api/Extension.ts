@@ -23,9 +23,7 @@ class Extension {
     }
 
     public static async create(...args: any[]) {
-        const _self = Object.create(this.prototype);
-        _self.init(...args);
-        return _self;
+        return await Object.create(this.prototype).init(...args);
     }
 
     /**
@@ -37,6 +35,7 @@ class Extension {
         await this._loadAccount();
         console.log(this.account)
         this.injected = await web3FromSource(this.account.meta.source);
+        return this;
     }
 
     public async checkExtensions(cb: NoExtensionCallback, compatInits?: (() => Promise<boolean>)[]) {
