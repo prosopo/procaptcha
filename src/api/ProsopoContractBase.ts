@@ -11,6 +11,7 @@ class ProsopoContractBase {
   protected api: ApiPromise;
   protected abi: Abi;
   protected contract: ContractPromise;
+  protected address: string;
 
   constructor() {
     throw new Error("Use `create` factory method");
@@ -28,7 +29,12 @@ class ProsopoContractBase {
     this.api = await ApiPromise.create({ provider });
     this.abi = new Abi(abiJson, this.api.registry.getChainProperties());
     this.contract = new ContractPromise(this.api, this.abi, address);
+    this.address = address;
     return this;
+  }
+
+  public getAdress(): string {
+    return this.address;
   }
 
   public getContract(): ContractPromise {

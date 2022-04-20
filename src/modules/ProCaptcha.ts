@@ -1,15 +1,25 @@
 import { InjectedAccountWithMeta } from "@polkadot/extension-inject/types";
 import {randomAsHex} from '@polkadot/util-crypto';
+import { blake2AsHex } from '@polkadot/util-crypto';
 
 import ProsopoContract from "../api/ProsopoContract";
 
 import {CaptchaMerkleTree} from '@prosopo/provider-core';
-import {computeCaptchaSolutionHash, computePendingRequestHash, parseCaptchaDataset} from '@prosopo/provider-core';
+// import {computeCaptchaSolutionHash} from '@prosopo/provider-core'; // TODO
+import {CaptchaSolution} from '@prosopo/provider-core';
 
 import config from "../config";
 import { Signer } from "@polkadot/api/types";
 
 const { providerApi } = config;
+
+function hexHash(data: string | Uint8Array): string {
+    return blake2AsHex(data);
+}
+
+function computeCaptchaSolutionHash(captcha: CaptchaSolution) {
+    return hexHash([captcha.captchaId, captcha.solution, captcha.salt].join());
+}
 
 class ProCaptcha {
 
@@ -45,13 +55,17 @@ class ProCaptcha {
     
         tree.build(captchasHashed);
         const commitmentId = tree.root!.hash;
+
+        console.log("solveCaptchaChallenge ACCOUNT", this.account.address);
+
+        console.log("solveCaptchaChallenge ADDRESS", this.contract.getAdress());
     
         const response = await this.contract.dappUserCommit(
             signer,
-            this.contract.getContract().address as unknown as string,
+            this.account.address,
             datasetId as string,
             commitmentId,
-            this.account.address,
+            this.contract.getAdress(),
         );
 
         console.log("dappUserCommit", response);
