@@ -16,7 +16,7 @@ import Extension from "./api/Extension";
 
 import { getExtension } from "./modules/extension";
 import { getProsopoContract } from "./modules/contract";
-import { getCaptchaChallenge } from "./modules/captcha";
+import ProCaptcha from "./modules/ProCaptcha";
 import { CaptchaWidget } from "./components/CaptchaWidget";
 
 import "./App.css";
@@ -43,6 +43,13 @@ function App() {
 
   const [captchaChallenge, setCaptchaChallenge] = useState<ProsopoCaptchaResponse | null>(null);
   const [captchaSolution, setCaptchaSolution] = useState<number[]>([]);
+
+  // const proCaptcha = useMemo((): ProCaptcha | null => {
+  //   if (contract && account) {
+  //     return new ProCaptcha(contract, account);
+  //   }
+  //   return null;
+  // }, [contract, account]);
 
   useEffect(() => {
     providerApi.getContractAddress()
@@ -86,20 +93,29 @@ function App() {
     setCurrentCaptchaIndex(0);
   };
 
-  const submitCaptchaHandler = () => {
-    if (!extension) {
+  const submitCaptchaHandler = async () => {
+    if (!extension || !contract || !account || !captchaChallenge) {
       return;
     }
 
-    console.log("SIGNER", extension.getInjected().signer);
+    const signer = extension.getInjected().signer;
 
-    if (currentCaptchaIndex === totalNumberOfCaptchas - 1) {
-      setShowCaptchas(!showCaptchas);
-      setAccount(null);
-      setCurrentCaptchaIndex(0);
-    } else {
-      setCurrentCaptchaIndex(currentCaptchaIndex + 1);
-    }
+    console.log("SIGNER", signer);
+
+    const proCaptcha = new ProCaptcha(contract, account);
+    const currentCaptcha = captchaChallenge.captchas[currentCaptchaIndex];
+    const { captchaId, datasetId } = currentCaptcha.captcha;
+    const solved = await proCaptcha.solveCaptchaChallenge(signer, captchaId, datasetId, captchaSolution);
+
+    console.log("CAPTCHA SOLVED", solved);
+
+    // if (currentCaptchaIndex === totalNumberOfCaptchas - 1) {
+    //   setShowCaptchas(!showCaptchas);
+    //   setAccount(null);
+    //   setCurrentCaptchaIndex(0);
+    // } else {
+    //   setCurrentCaptchaIndex(currentCaptchaIndex + 1);
+    // }
   };
 
 
@@ -110,7 +126,8 @@ function App() {
     extension.setAccount(account.address).then(async (account) => {
       setAccount(account);
       // contract.setAccountAddress(account.address);
-      setCaptchaChallenge(await getCaptchaChallenge(contract, account));
+      const proCaptcha = new ProCaptcha(contract, account);
+      setCaptchaChallenge(await proCaptcha.getCaptchaChallenge());
     });
   };
 

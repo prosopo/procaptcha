@@ -31,6 +31,10 @@ class ProsopoContractBase {
     return this;
   }
 
+  public getContract(): ContractPromise {
+    return this.contract;
+  }
+
   public async query<T>(user: string, method: string, args: any[]): Promise<T | AnyJson | null> {
     try {
       const abiMessage = this.abi.findMessage(method);
