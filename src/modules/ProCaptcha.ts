@@ -24,20 +24,14 @@ function computeCaptchaSolutionHash(captcha: CaptchaSolution) {
 class ProCaptcha {
 
     protected contract: ProsopoContract;
-    protected account: InjectedAccountWithMeta;
 
-    constructor(contract: ProsopoContract, account: InjectedAccountWithMeta) {
+    constructor(contract: ProsopoContract) {
         this.contract = contract;
-        this.account = account;
-    }
-
-    public setAccount(account: InjectedAccountWithMeta) {
-        this.account = account;
     }
 
     public async getCaptchaChallenge(): Promise<ProsopoCaptchaResponse> {
-        console.log("ACCOUNT", this.account.address);
-        const randomProvider = await this.contract.getRandomProvider(this.account.address);
+        console.log("ACCOUNT", this.contract.getAccount().address);
+        const randomProvider = await this.contract.getRandomProvider(this.contract.getAccount().address);
         console.log("PROVIDER", randomProvider);
         if (!randomProvider) {
             throw new Error("No random provider");
@@ -56,16 +50,16 @@ class ProCaptcha {
         tree.build(captchasHashed);
         const commitmentId = tree.root!.hash;
 
-        console.log("solveCaptchaChallenge ACCOUNT", this.account.address);
+        console.log("solveCaptchaChallenge ACCOUNT", this.contract.getAccount().address);
 
-        console.log("solveCaptchaChallenge ADDRESS", this.contract.getAdress());
+        console.log("solveCaptchaChallenge ADDRESS", this.contract.address);
     
         const response = await this.contract.dappUserCommit(
             signer,
-            this.account.address,
+            this.contract.getAccount().address,
             datasetId as string,
             commitmentId,
-            this.contract.getAdress(),
+            this.contract.address,
         );
 
         console.log("dappUserCommit", response);

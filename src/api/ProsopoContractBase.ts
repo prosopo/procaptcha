@@ -1,5 +1,7 @@
 import { ApiPromise } from "@polkadot/api";
 import { Abi, ContractPromise } from "@polkadot/api-contract";
+import { InjectedAccountWithMeta } from "@polkadot/extension-inject/types";
+
 import abiJson from "../abi/prosopo.json";
 import { AnyJson } from "@polkadot/types/types/codec";
 import { ProviderInterface } from "@polkadot/rpc-provider/types";
@@ -11,7 +13,9 @@ class ProsopoContractBase {
   protected api: ApiPromise;
   protected abi: Abi;
   protected contract: ContractPromise;
-  protected address: string;
+  protected account: InjectedAccountWithMeta;
+
+  public address: string;
 
   constructor() {
     throw new Error("Use `create` factory method");
@@ -25,27 +29,28 @@ class ProsopoContractBase {
    * @param provider
    * @param address
    */
-  protected async init(provider: ProviderInterface, address: string) {
+  protected async init(address: string, account: InjectedAccountWithMeta, provider: ProviderInterface) {
     this.api = await ApiPromise.create({ provider });
     this.abi = new Abi(abiJson, this.api.registry.getChainProperties());
     this.contract = new ContractPromise(this.api, this.abi, address);
+    this.account = account;
     this.address = address;
     return this;
   }
 
-  public getAdress(): string {
-    return this.address;
+  public getAccount(): InjectedAccountWithMeta {
+    return this.account;
   }
 
   public getContract(): ContractPromise {
     return this.contract;
   }
 
-  public async query<T>(user: string, method: string, args: any[]): Promise<T | AnyJson | null> {
+  public async query<T>(method: string, args: any[]): Promise<T | AnyJson | null> {
     try {
       const abiMessage = this.abi.findMessage(method);
       const response = await this.contract.query[method](
-        user,
+        this.account.address,
         {},
         ...encodeStringArgs(abiMessage, args)
       );
@@ -99,7 +104,7 @@ class ProsopoContractBase {
       //     })
       // });
 
-      return await extrinsic.signAndSend(this.contract.address, {
+      return await extrinsic.signAndSend(this.account.address, {
         signer,
         // signer: this.extension.getInjected().signer
       });

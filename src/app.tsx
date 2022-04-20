@@ -28,6 +28,7 @@ function App() {
 
   const classes = useStyles();
 
+  const [contractAddress, setContractAddress] = useState<string>('');
   const [contract, setContract] = useState<ProsopoContract | null>(null);
   const [extension, setExtension] = useState<Extension | null>(null);
 
@@ -52,24 +53,28 @@ function App() {
   // }, [contract, account]);
 
   useEffect(() => {
-    providerApi.getContractAddress()
-      .then(address => {
-        console.log("ADDRESS", address.contractAddress);
-        Promise.all([getProsopoContract(address.contractAddress), getExtension()])
+    
+      // .then(address => {
+        // console.log("ADDRESS", address.contractAddress);
+        Promise.all([providerApi.getContractAddress(), getExtension()])
+        // Promise.all([getProsopoContract(address.contractAddress), getExtension()])
           .then(result => {
-              const [_contract, _extension] = result;
-              console.log("CONTRACT", _contract);
-              setContract(_contract);
+              const [_contractAddress, _extension] = result;
+
+              console.log("CONTRACT", _contractAddress.contractAddress);
+
+              setContractAddress(_contractAddress.contractAddress);
+              // setContract(_contract);
               setExtension(_extension);
               // setAccounts(_extension.getAllAcounts());
           })
           .catch(err => { 
               console.error(err);
           });
-      })
-      .catch(err => {
-        console.error(err);
-      });
+      // })
+      // .catch(err => {
+      //   console.error(err);
+      // });
 
   }, []);
 
@@ -94,7 +99,8 @@ function App() {
   };
 
   const submitCaptchaHandler = async () => {
-    if (!extension || !contract || !account || !captchaChallenge) {
+    if (!extension || !contract || !captchaChallenge) {
+      // TODO throw error
       return;
     }
 
@@ -102,7 +108,7 @@ function App() {
 
     console.log("SIGNER", signer);
 
-    const proCaptcha = new ProCaptcha(contract, account);
+    const proCaptcha = new ProCaptcha(contract);
     const currentCaptcha = captchaChallenge.captchas[currentCaptchaIndex];
     const { captchaId, datasetId } = currentCaptcha.captcha;
     const solved = await proCaptcha.solveCaptchaChallenge(signer, captchaId, datasetId, captchaSolution);
@@ -120,13 +126,15 @@ function App() {
 
 
   const onAccountChange = (e: SyntheticEvent<Element, Event>, account: any) => {
-    if (!contract || !extension) {
+    if (!extension || !contractAddress) {
       return;
     }
     extension.setAccount(account.address).then(async (account) => {
       setAccount(account);
+      const _contract = await getProsopoContract(contractAddress, account);
+      setContract(_contract);
       // contract.setAccountAddress(account.address);
-      const proCaptcha = new ProCaptcha(contract, account);
+      const proCaptcha = new ProCaptcha(_contract);
       setCaptchaChallenge(await proCaptcha.getCaptchaChallenge());
     });
   };
