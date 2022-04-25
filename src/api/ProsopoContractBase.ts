@@ -79,35 +79,36 @@ class ProsopoContractBase {
         ...encodeStringArgs(abiMessage, args)
       );
 
-      // await new Promise((resolve) => {
-      //     extrinsic.signAndSend(accountId, { signer }, (result) => {
-      //         // if (result.status.isRetracted) {
-      //         //     throw (result.status.asRetracted)
-      //         // }
-      //         // if (result.status.isInvalid) {
-      //         //     // TODO: not quite sure how these errors work so should be updated later
-      //         //     // @ts-ignore
-      //         //     throw (result.status.asInvalid)
-      //         // }
+      // https://polkadot.js.org/docs/api-contract/start/contract.tx
+      return new Promise((resolve) => {
 
-      //         // console.log(result.toHuman())
-      //         // if (result.isInBlock || result.isFinalized) {
-      //         //     const eventName = getEventNameFromMethodName(method)
-      //         //     // Most contract transactions should return an event
-      //         //     if (result.events) {
-      //         //         console.log(result.events)
-      //         //         // @ts-ignore
-      //         //         resolve(result.events.filter((x) => x.name === eventName))
-      //         //     }
-      //         // }
-      //         resolve([])
-      //     })
-      // });
+        extrinsic.signAndSend(this.account.address, { signer }, (result) => {
 
-      return await extrinsic.signAndSend(this.account.address, {
-        signer,
-        // signer: this.extension.getInjected().signer
+          console.log("IS FINALIZED", result.isFinalized);
+
+          console.log("IN BLOCK", result.isInBlock);
+          if (result.isInBlock) {
+            console.log("AS BLOCK", result.status.asInBlock);
+          }
+          console.log("RESULT HUMAN", result.toHuman());
+          console.log("txHash", result.txHash);
+          console.log("status", result.status);
+
+          console.log("EVENTS", result.events);
+
+          // https://polkadot.js.org/docs/api/cookbook/tx/
+          if (result.isInBlock || result.isFinalized) {
+            if (result.events) {
+                console.log("EVENTS", result.events);
+            }
+          }
+
+          resolve(result);
+
+        });
+
       });
+
     } catch (e) {
       console.log(["ERROR", e]);
       return null;

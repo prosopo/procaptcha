@@ -4,9 +4,8 @@ import { blake2AsHex } from '@polkadot/util-crypto';
 
 import ProsopoContract from "../api/ProsopoContract";
 
-import {CaptchaMerkleTree} from '@prosopo/provider-core';
+import {CaptchaSolution, CaptchaMerkleTree} from '@prosopo/provider-core';
 // import {computeCaptchaSolutionHash} from '@prosopo/provider-core'; // TODO
-import {CaptchaSolution} from '@prosopo/provider-core';
 
 import config from "../config";
 import { Signer } from "@polkadot/api/types";
@@ -62,8 +61,7 @@ class ProCaptcha {
             this.contract.address,
         );
 
-        console.log("dappUserCommit", response);
-    
+        return response;
     }
 
 }

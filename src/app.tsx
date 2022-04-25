@@ -115,13 +115,16 @@ function App() {
 
     console.log("CAPTCHA SOLVED", solved);
 
-    // if (currentCaptchaIndex === totalNumberOfCaptchas - 1) {
-    //   setShowCaptchas(!showCaptchas);
-    //   setAccount(null);
-    //   setCurrentCaptchaIndex(0);
-    // } else {
-    //   setCurrentCaptchaIndex(currentCaptchaIndex + 1);
-    // }
+    console.log("dappUserCommit HUMAN", solved.toHuman());
+
+    const nextCaptchaIndex = currentCaptchaIndex + 1;
+
+    if (nextCaptchaIndex < totalNumberOfCaptchas) {
+      setCurrentCaptchaIndex(nextCaptchaIndex);
+    } else {
+      setCaptchaChallenge(null);
+    }
+
   };
 
 
