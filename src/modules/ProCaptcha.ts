@@ -28,19 +28,20 @@ class ProCaptcha {
         this.contract = contract;
     }
 
-    public async getCaptchaChallenge(): Promise<ProsopoCaptchaResponse> {
-        console.log("ACCOUNT", this.contract.getAccount().address);
-        const randomProvider = await this.contract.getRandomProvider(this.contract.getAccount().address);
-        console.log("PROVIDER", randomProvider);
-        if (!randomProvider) {
-            throw new Error("No random provider");
-        }
-        const captchaPuzzle: ProsopoCaptchaResponse = await providerApi.getCaptchaChallenge(randomProvider);
+    public async getRandomProvider(): Promise<ProsopoRandomProviderResponse> {
+        return await this.contract.getRandomProvider(this.contract.getAccount().address);
+    }
+
+    public async getCaptchaChallenge(provider: ProsopoRandomProviderResponse): Promise<ProsopoCaptchaResponse> {
+        // console.log("ACCOUNT", this.contract.getAccount().address);
+        // const randomProvider = await this.contract.getRandomProvider(this.contract.getAccount().address);
+        console.log("PROVIDER", provider);
+        const captchaPuzzle: ProsopoCaptchaResponse = await providerApi.getCaptchaChallenge(provider);
         console.log("CAPTCHA", captchaPuzzle);
         return captchaPuzzle;
     }
 
-    public async solveCaptchaChallenge(signer: Signer, captchaId: string, datasetId: string, solution: number[]) : Promise<any> {
+    public async solveCaptchaChallenge(signer: Signer, provider: string, captchaId: string, datasetId: string, solution: number[]) : Promise<any> {
         const salt = randomAsHex();
         const tree = new CaptchaMerkleTree();
         const captchaSolutionsSalted = [{ captchaId, solution, salt }];
@@ -55,10 +56,11 @@ class ProCaptcha {
     
         const response = await this.contract.dappUserCommit(
             signer,
-            this.contract.getAccount().address,
+            config.dappAccount,
+            // this.contract.getAccount().address,
             datasetId as string,
             commitmentId,
-            this.contract.address,
+            provider,
         );
 
         return response;

@@ -36,11 +36,13 @@ function App() {
   const [account, setAccount] = useState<InjectedAccountWithMeta | null>(null);
 
   const [showCaptchas, setShowCaptchas] = useState(false);
-  const [totalNumberOfCaptchas, setTotalNumberOfCaptchas] = useState(0);
+  const [totalCaptchas, setTotalCaptchas] = useState(0);
   const [currentCaptchaIndex, setCurrentCaptchaIndex] = useState(0);
 
   // let currentCaptcha: ProsopoCaptcha | undefined;
   // const accounts = contract.extension?.getAllAcounts();
+
+  const [provider, setProvider] = useState<ProsopoRandomProviderResponse | null>(null);
 
   const [captchaChallenge, setCaptchaChallenge] = useState<ProsopoCaptchaResponse | null>(null);
   const [captchaSolution, setCaptchaSolution] = useState<number[]>([]);
@@ -79,7 +81,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    setTotalNumberOfCaptchas(captchaChallenge?.captchas.length ?? 0);
+    setTotalCaptchas(captchaChallenge?.captchas.length ?? 0);
     setCurrentCaptchaIndex(0);
   }, [captchaChallenge]);
 
@@ -92,7 +94,8 @@ function App() {
     setAccount(null);
   };
 
-  const cancelCaptchasHandler = () => {
+  const cancelCaptchas = () => {
+    setCaptchaChallenge(null);
     setShowCaptchas(false);
     setAccount(null);
     setCurrentCaptchaIndex(0);
@@ -111,18 +114,18 @@ function App() {
     const proCaptcha = new ProCaptcha(contract);
     const currentCaptcha = captchaChallenge.captchas[currentCaptchaIndex];
     const { captchaId, datasetId } = currentCaptcha.captcha;
-    const solved = await proCaptcha.solveCaptchaChallenge(signer, captchaId, datasetId, captchaSolution);
+    const solved = await proCaptcha.solveCaptchaChallenge(signer, provider.providerId, captchaId, datasetId, captchaSolution);
 
     console.log("CAPTCHA SOLVED", solved);
 
-    console.log("dappUserCommit HUMAN", solved.toHuman());
+    // console.log("dappUserCommit HUMAN", solved.toHuman());
 
     const nextCaptchaIndex = currentCaptchaIndex + 1;
 
-    if (nextCaptchaIndex < totalNumberOfCaptchas) {
+    if (nextCaptchaIndex < totalCaptchas) {
       setCurrentCaptchaIndex(nextCaptchaIndex);
     } else {
-      setCaptchaChallenge(null);
+      cancelCaptchas();
     }
 
   };
@@ -136,9 +139,15 @@ function App() {
       setAccount(account);
       const _contract = await getProsopoContract(contractAddress, account);
       setContract(_contract);
-      // contract.setAccountAddress(account.address);
+      const _provider = await _contract.getRandomProvider();
+      setProvider(_provider);
+      
+      console.log("SET PROVIDER", _provider);
+
+      // return;
+
       const proCaptcha = new ProCaptcha(_contract);
-      setCaptchaChallenge(await proCaptcha.getCaptchaChallenge());
+      setCaptchaChallenge(await proCaptcha.getCaptchaChallenge(_provider));
     });
   };
 
@@ -185,7 +194,7 @@ function App() {
             {captchaChallenge && <CaptchaWidget challenge={captchaChallenge[currentCaptchaIndex]} solution={captchaSolution} solutionClickEvent={onCaptchaSolutionClick} />}
 
             <Box className={classes.dotsContainer}>
-              {Array.from(Array(totalNumberOfCaptchas).keys()).map((item, index) => {
+              {Array.from(Array(totalCaptchas).keys()).map((item, index) => {
                 return (
                   <Box
                     key={index}
@@ -201,11 +210,11 @@ function App() {
           </Box>
 
           <Box className={classes.captchasFooter}>
-            <Button onClick={cancelCaptchasHandler} variant="text">
+            <Button onClick={cancelCaptchas} variant="text">
               Cancel
             </Button>
             <Button onClick={submitCaptchaHandler} variant="contained">
-              {currentCaptchaIndex === totalNumberOfCaptchas - 1
+              {currentCaptchaIndex === totalCaptchas - 1
                 ? "Submit"
                 : "Next"}
             </Button>

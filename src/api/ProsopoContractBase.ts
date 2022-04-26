@@ -1,4 +1,4 @@
-import { ApiPromise } from "@polkadot/api";
+import { ApiPromise, SubmittableResult } from "@polkadot/api";
 import { Abi, ContractPromise } from "@polkadot/api-contract";
 import { InjectedAccountWithMeta } from "@polkadot/extension-inject/types";
 
@@ -8,6 +8,7 @@ import { ProviderInterface } from "@polkadot/rpc-provider/types";
 import { unwrap, encodeStringArgs } from "../common/helpers";
 import Extension, { NoExtensionCallback } from "./Extension";
 import { Signer } from "@polkadot/api/types";
+import { buildTx } from "@prosopo/contract";
 class ProsopoContractBase {
 
   protected api: ApiPromise;
@@ -54,7 +55,7 @@ class ProsopoContractBase {
         {},
         ...encodeStringArgs(abiMessage, args)
       );
-      if (response.result.isOk) {
+      if (response.result.isOk) { 
         if (response.output) {
           return unwrap(response.output.toHuman());
         } else {
@@ -72,21 +73,36 @@ class ProsopoContractBase {
   }
 
   public async transaction<T>(signer: Signer, method: string, args: any[]): Promise<T | AnyJson | null | any> {
+
+    const test = await this.query(method, args);
+
+    console.log("query....................", test);
+
     try {
       const abiMessage = this.abi.findMessage(method);
       const extrinsic = this.contract.tx[method](
-        {},
+        {/* value, gasLimit */}, // https://polkadot.js.org/docs/api-contract/start/contract.tx
         ...encodeStringArgs(abiMessage, args)
       );
+
+      // const response = await buildTx(this.api.registry, extrinsic, this.account.address, { signer });
+      // console.log("buildTx RESPONSE", response);
+      // return;
 
       // https://polkadot.js.org/docs/api-contract/start/contract.tx
       return new Promise((resolve) => {
 
-        extrinsic.signAndSend(this.account.address, { signer }, (result) => {
+        extrinsic.signAndSend(this.account.address, { signer }, (result: SubmittableResult) => {
 
-          console.log("IS FINALIZED", result.isFinalized);
+          console.log("RESULT", JSON.stringify(result));
 
-          console.log("IN BLOCK", result.isInBlock);
+          const blockHash = result.status?.asInBlock?.toHex();
+
+          console.log("BLOCK HASH", blockHash);
+
+          console.log("IS FINALIZED", result.status?.isFinalized);
+
+          console.log("IN BLOCK", result.status?.isInBlock);
           if (result.isInBlock) {
             console.log("AS BLOCK", result.status.asInBlock);
           }
@@ -97,7 +113,7 @@ class ProsopoContractBase {
           console.log("EVENTS", result.events);
 
           // https://polkadot.js.org/docs/api/cookbook/tx/
-          if (result.isInBlock || result.isFinalized) {
+          if (result.status?.isInBlock || result.status?.isFinalized) {
             if (result.events) {
                 console.log("EVENTS", result.events);
             }

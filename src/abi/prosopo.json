@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0xc498570db3f4a7c7d2a93e3c3992117ce8e393fb4efc7c27c809ce1303798003",
+    "hash": "0x1e28534b3bc28feed809f1d30ea60aa3180d5c8263b6620a5b8a1344a33260e3",
     "language": "ink! 3.0.0",
     "compiler": "rustc 1.62.0-nightly"
   },
@@ -23,6 +23,15 @@
                   "AccountId"
                 ],
                 "type": 1
+              }
+            },
+            {
+              "label": "provider_stake_default",
+              "type": {
+                "displayName": [
+                  "u128"
+                ],
+                "type": 6
               }
             }
           ],
@@ -413,6 +422,22 @@
         }
       ],
       "messages": [
+        {
+          "args": [],
+          "docs": [
+            " Get contract minimum stake default."
+          ],
+          "label": "get_provider_stake_default",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "u128"
+            ],
+            "type": 6
+          },
+          "selector": "0xf6c00565"
+        },
         {
           "args": [
             {
@@ -813,7 +838,7 @@
             " Threshold is decided by the calling user"
           ],
           "label": "dapp_operator_is_human_user",
-          "mutates": true,
+          "mutates": false,
           "payable": false,
           "returnType": {
             "displayName": [
@@ -2591,6 +2616,11 @@
           "def": {
             "composite": {
               "fields": [
+                {
+                  "name": "provider_id",
+                  "type": 1,
+                  "typeName": "AccountId"
+                },
                 {
                   "name": "provider",
                   "type": 4,

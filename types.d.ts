@@ -5,6 +5,7 @@ declare module "*.json" {
 
 
 interface ProsopoRandomProviderResponse {
+  providerId: string,
   blockNumber: string;
   provider: ProposoProvider;
 }
