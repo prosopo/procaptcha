@@ -22,7 +22,12 @@ import { CaptchaWidget } from "./components/CaptchaWidget";
 import "./App.css";
 import { useStyles } from "./app.styles";
 
+<<<<<<< HEAD:src/app.tsx
 const { providerApi } = config;
+=======
+const { providerApi, networkConfig } = config;
+const network = createNetwork('', networkConfig);
+>>>>>>> 838e602c2c29d6b2e15760bb8a7ae8cc969612bc:packages/ui/src/app.tsx
 
 function App() {
 
