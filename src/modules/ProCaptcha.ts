@@ -2,15 +2,16 @@ import { InjectedAccountWithMeta } from "@polkadot/extension-inject/types";
 import {randomAsHex} from '@polkadot/util-crypto';
 import { blake2AsHex } from '@polkadot/util-crypto';
 
+import ProviderApi from "../api/ProviderApi";
 import ProsopoContract from "../api/ProsopoContract";
 
 import {CaptchaSolution, CaptchaMerkleTree} from '@prosopo/provider-core';
 // import {computeCaptchaSolutionHash} from '@prosopo/provider-core'; // TODO
 
-import config from "../config";
 import { Signer } from "@polkadot/api/types";
 
-const { providerApi } = config;
+import config from "../config";
+
 
 function hexHash(data: string | Uint8Array): string {
     return blake2AsHex(data);
@@ -20,28 +21,29 @@ function computeCaptchaSolutionHash(captcha: CaptchaSolution) {
     return hexHash([captcha.captchaId, captcha.solution, captcha.salt].join());
 }
 
-class ProCaptcha {
+export class ProCaptcha {
 
     protected contract: ProsopoContract;
+    protected provider: ProsopoRandomProviderResponse;
+    protected config: {[key: string]: string};
+    public providerApi: ProviderApi;
 
-    constructor(contract: ProsopoContract) {
+    constructor(contract: ProsopoContract, provider: ProsopoRandomProviderResponse, config: {[key: string]: string}) {
         this.contract = contract;
+        this.provider = provider;
+        this.config = config;
+        this.providerApi = new ProviderApi(config['providerApi.baseURL'], config['providerApi.prefix']);
     }
 
-    public async getRandomProvider(): Promise<ProsopoRandomProviderResponse> {
-        return await this.contract.getRandomProvider(this.contract.getAccount().address);
-    }
-
-    public async getCaptchaChallenge(provider: ProsopoRandomProviderResponse): Promise<ProsopoCaptchaResponse> {
+    public async getCaptchaChallenge(): Promise<ProsopoCaptchaResponse> {
         // console.log("ACCOUNT", this.contract.getAccount().address);
         // const randomProvider = await this.contract.getRandomProvider(this.contract.getAccount().address);
-        console.log("PROVIDER", provider);
-        const captchaPuzzle: ProsopoCaptchaResponse = await providerApi.getCaptchaChallenge(provider);
+        const captchaPuzzle: ProsopoCaptchaResponse = await this.providerApi.getCaptchaChallenge(this.provider);
         console.log("CAPTCHA", captchaPuzzle);
         return captchaPuzzle;
     }
 
-    public async solveCaptchaChallenge(signer: Signer, provider: string, captchaId: string, datasetId: string, solution: number[]) : Promise<any> {
+    public async solveCaptchaChallenge(signer: Signer, captchaId: string, datasetId: string, solution: number[]) : Promise<any> {
         const salt = randomAsHex();
         const tree = new CaptchaMerkleTree();
         const captchaSolutionsSalted = [{ captchaId, solution, salt }];
@@ -56,11 +58,11 @@ class ProCaptcha {
     
         const response = await this.contract.dappUserCommit(
             signer,
-            config.dappAccount,
+            this.config['dappAccount'],
             // this.contract.getAccount().address,
             datasetId as string,
             commitmentId,
-            provider,
+            this.provider.providerId,
         );
 
         return response;

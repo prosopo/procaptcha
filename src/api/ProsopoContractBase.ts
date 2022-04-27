@@ -9,7 +9,7 @@ import { unwrap, encodeStringArgs } from "../common/helpers";
 import Extension, { NoExtensionCallback } from "./Extension";
 import { Signer } from "@polkadot/api/types";
 import { buildTx } from "@prosopo/contract";
-class ProsopoContractBase {
+export class ProsopoContractBase {
 
   protected api: ApiPromise;
   protected abi: Abi;
@@ -30,8 +30,8 @@ class ProsopoContractBase {
    * @param provider
    * @param address
    */
-  protected async init(address: string, account: InjectedAccountWithMeta, provider: ProviderInterface) {
-    this.api = await ApiPromise.create({ provider });
+  protected async init(address: string, account: InjectedAccountWithMeta, providerInterface: ProviderInterface) {
+    this.api = await ApiPromise.create({ provider: providerInterface });
     this.abi = new Abi(abiJson, this.api.registry.getChainProperties());
     this.contract = new ContractPromise(this.api, this.abi, address);
     this.account = account;

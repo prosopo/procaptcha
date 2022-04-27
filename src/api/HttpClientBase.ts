@@ -5,6 +5,7 @@ class HttpClientBase {
   protected readonly axios: AxiosInstance;
 
   constructor(baseURL: string, prefix = "/v1/prosopo") {
+    
     baseURL = baseURL + prefix;
     
     this.axios = axios.create({ baseURL });

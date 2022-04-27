@@ -13,6 +13,7 @@ import config from "./config";
 
 import ProsopoContract from "./api/ProsopoContract";
 import Extension from "./api/Extension";
+import ProviderApi from "./api/ProviderApi";
 
 import { getExtension } from "./modules/extension";
 import { getProsopoContract } from "./modules/contract";
@@ -22,12 +23,7 @@ import { CaptchaWidget } from "./components/CaptchaWidget";
 import "./App.css";
 import { useStyles } from "./app.styles";
 
-<<<<<<< HEAD:src/app.tsx
-const { providerApi } = config;
-=======
-const { providerApi, networkConfig } = config;
-const network = createNetwork('', networkConfig);
->>>>>>> 838e602c2c29d6b2e15760bb8a7ae8cc969612bc:packages/ui/src/app.tsx
+// const { providerApi } = config;
 
 function App() {
 
@@ -52,36 +48,19 @@ function App() {
   const [captchaChallenge, setCaptchaChallenge] = useState<ProsopoCaptchaResponse | null>(null);
   const [captchaSolution, setCaptchaSolution] = useState<number[]>([]);
 
-  // const proCaptcha = useMemo((): ProCaptcha | null => {
-  //   if (contract && account) {
-  //     return new ProCaptcha(contract, account);
-  //   }
-  //   return null;
-  // }, [contract, account]);
-
   useEffect(() => {
-    
-      // .then(address => {
-        // console.log("ADDRESS", address.contractAddress);
-        Promise.all([providerApi.getContractAddress(), getExtension()])
-        // Promise.all([getProsopoContract(address.contractAddress), getExtension()])
-          .then(result => {
-              const [_contractAddress, _extension] = result;
-
-              console.log("CONTRACT", _contractAddress.contractAddress);
-
-              setContractAddress(_contractAddress.contractAddress);
-              // setContract(_contract);
-              setExtension(_extension);
-              // setAccounts(_extension.getAllAcounts());
-          })
-          .catch(err => { 
-              console.error(err);
-          });
-      // })
-      // .catch(err => {
-      //   console.error(err);
-      // });
+    const providerApi = new ProviderApi(config['providerApi.baseURL'], config['providerApi.prefix']);
+    Promise.all([providerApi.getContractAddress(), getExtension()])
+      .then(result => {
+          const [_contractAddress, _extension] = result;
+          setContractAddress(_contractAddress.contractAddress);
+          setExtension(_extension);
+          // setAccounts(_extension.getAllAcounts());
+          console.log("CONTRACT", _contractAddress.contractAddress);
+      })
+      .catch(err => { 
+          console.error(err);
+      });
 
   }, []);
 
@@ -107,7 +86,7 @@ function App() {
   };
 
   const submitCaptchaHandler = async () => {
-    if (!extension || !contract || !captchaChallenge) {
+    if (!extension || !contract || !provider || !captchaChallenge) {
       // TODO throw error
       return;
     }
@@ -116,10 +95,10 @@ function App() {
 
     console.log("SIGNER", signer);
 
-    const proCaptcha = new ProCaptcha(contract);
+    const proCaptcha = new ProCaptcha(contract, provider, config);
     const currentCaptcha = captchaChallenge.captchas[currentCaptchaIndex];
     const { captchaId, datasetId } = currentCaptcha.captcha;
-    const solved = await proCaptcha.solveCaptchaChallenge(signer, provider.providerId, captchaId, datasetId, captchaSolution);
+    const solved = await proCaptcha.solveCaptchaChallenge(signer, captchaId, datasetId, captchaSolution);
 
     console.log("CAPTCHA SOLVED", solved);
 
@@ -142,17 +121,17 @@ function App() {
     }
     extension.setAccount(account.address).then(async (account) => {
       setAccount(account);
+
       const _contract = await getProsopoContract(contractAddress, account);
       setContract(_contract);
+      
       const _provider = await _contract.getRandomProvider();
       setProvider(_provider);
       
-      console.log("SET PROVIDER", _provider);
+      console.log("PROVIDER", _provider);
 
-      // return;
-
-      const proCaptcha = new ProCaptcha(_contract);
-      setCaptchaChallenge(await proCaptcha.getCaptchaChallenge(_provider));
+      const proCaptcha = new ProCaptcha(_contract, _provider, config);
+      setCaptchaChallenge(await proCaptcha.getCaptchaChallenge());
     });
   };
 

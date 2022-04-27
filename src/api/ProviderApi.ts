@@ -1,7 +1,7 @@
 import HttpClientBase from "./HttpClientBase";
 import Storage from "../modules/storage";
 
-class ProviderApi extends HttpClientBase {
+export class ProviderApi extends HttpClientBase {
 
   /**
    * 

@@ -4,13 +4,14 @@ import {TransactionResponse} from '@redspot/patract/types';
 import { Signer } from '@polkadot/api/types';
 
 // TODO: import return types from provider: separate types/common package.
-class ProsopoContract extends ProsopoContractBase {
-    public async getRandomProvider(userAccount: string): Promise<ProsopoRandomProviderResponse | null> {
-        return await this.query('getRandomActiveProvider', [userAccount]) as ProsopoRandomProviderResponse;
+export class ProsopoContract extends ProsopoContractBase {
+
+    public async getRandomProvider(): Promise<ProsopoRandomProviderResponse> {
+        return await this.query('getRandomActiveProvider', [this.account.address]) as ProsopoRandomProviderResponse;
     }
 
-    public async dappUserCommit(signer: Signer, contractAccount: string, captchaDatasetId: string, userMerkleTreeRoot: string, providerAddress: string): Promise<TransactionResponse> {
-        return await this.transaction(signer, 'dappUserCommit', [contractAccount, captchaDatasetId, userMerkleTreeRoot, providerAddress]);
+    public async dappUserCommit(signer: Signer, dappAccount: string, captchaDatasetId: string, userMerkleTreeRoot: string, providerAddress: string): Promise<TransactionResponse> {
+        return await this.transaction(signer, 'dappUserCommit', [dappAccount, captchaDatasetId, userMerkleTreeRoot, providerAddress]);
     }
 
 }
