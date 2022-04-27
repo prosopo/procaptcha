@@ -48,14 +48,14 @@ export class ProCaptcha {
         const tree = new CaptchaMerkleTree();
         const captchaSolutionsSalted = [{ captchaId, solution, salt }];
         const captchasHashed = captchaSolutionsSalted.map((captcha) => computeCaptchaSolutionHash(captcha));
-    
+
         tree.build(captchasHashed);
         const commitmentId = tree.root!.hash;
 
         console.log("solveCaptchaChallenge ACCOUNT", this.contract.getAccount().address);
 
         console.log("solveCaptchaChallenge ADDRESS", this.contract.address);
-    
+
         const response = await this.contract.dappUserCommit(
             signer,
             this.config['dappAccount'],
@@ -64,6 +64,8 @@ export class ProCaptcha {
             commitmentId,
             this.provider.providerId,
         );
+
+        console.log("response Stringified", JSON.stringify(response))
 
         return response;
     }

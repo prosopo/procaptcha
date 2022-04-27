@@ -9,9 +9,10 @@ import { unwrap, encodeStringArgs } from "../common/helpers";
 import Extension, { NoExtensionCallback } from "./Extension";
 import { Signer } from "@polkadot/api/types";
 import { buildTx } from "@prosopo/contract";
+import { contractDefinitions } from "@prosopo/contract"
 export class ProsopoContractBase {
 
-  protected api: ApiPromise;
+  public api: ApiPromise;
   protected abi: Abi;
   protected contract: ContractPromise;
   protected account: InjectedAccountWithMeta;
@@ -27,12 +28,14 @@ export class ProsopoContractBase {
   }
 
   /**
-   * @param provider
    * @param address
+   * @param account
+   * @param providerInterface
    */
   protected async init(address: string, account: InjectedAccountWithMeta, providerInterface: ProviderInterface) {
     this.api = await ApiPromise.create({ provider: providerInterface });
     this.abi = new Abi(abiJson, this.api.registry.getChainProperties());
+    //await this.api.registry.register(contractDefinitions);
     this.contract = new ContractPromise(this.api, this.abi, address);
     this.account = account;
     this.address = address;
@@ -55,7 +58,7 @@ export class ProsopoContractBase {
         {},
         ...encodeStringArgs(abiMessage, args)
       );
-      if (response.result.isOk) { 
+      if (response.result.isOk) {
         if (response.output) {
           return unwrap(response.output.toHuman());
         } else {
@@ -83,9 +86,9 @@ export class ProsopoContractBase {
       const extrinsic = this.contract.tx[method](
         {/* value, gasLimit */}, // https://polkadot.js.org/docs/api-contract/start/contract.tx
         ...encodeStringArgs(abiMessage, args)
-      );
+      )
 
-      // const response = await buildTx(this.api.registry, extrinsic, this.account.address, { signer });
+        // const response = await buildTx(this.api.registry, extrinsic, this.account.address, { signer });
       // console.log("buildTx RESPONSE", response);
       // return;
 
@@ -121,6 +124,8 @@ export class ProsopoContractBase {
 
           resolve(result);
 
+        }).catch((error) => {
+          throw error.error || error;
         });
 
       });

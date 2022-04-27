@@ -11,6 +11,7 @@ export class ProsopoContract extends ProsopoContractBase {
     }
 
     public async dappUserCommit(signer: Signer, dappAccount: string, captchaDatasetId: string, userMerkleTreeRoot: string, providerAddress: string): Promise<TransactionResponse> {
+        console.log("userMerkleTreeRoot", userMerkleTreeRoot);
         return await this.transaction(signer, 'dappUserCommit', [dappAccount, captchaDatasetId, userMerkleTreeRoot, providerAddress]);
     }
 

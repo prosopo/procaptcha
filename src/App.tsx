@@ -58,7 +58,7 @@ function App() {
           // setAccounts(_extension.getAllAcounts());
           console.log("CONTRACT", _contractAddress.contractAddress);
       })
-      .catch(err => { 
+      .catch(err => {
           console.error(err);
       });
 
@@ -92,7 +92,8 @@ function App() {
     }
 
     const signer = extension.getInjected().signer;
-
+    await contract.api.setSigner(signer)
+    const { nonce } = await contract.api.query.system.account(account.address!);
     console.log("SIGNER", signer);
 
     const proCaptcha = new ProCaptcha(contract, provider, config);
@@ -124,10 +125,10 @@ function App() {
 
       const _contract = await getProsopoContract(contractAddress, account);
       setContract(_contract);
-      
+
       const _provider = await _contract.getRandomProvider();
       setProvider(_provider);
-      
+
       console.log("PROVIDER", _provider);
 
       const proCaptcha = new ProCaptcha(_contract, _provider, config);
