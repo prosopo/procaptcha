@@ -24,14 +24,12 @@ export class ProCaptcha {
 
     protected contract: ProsopoContract;
     protected provider: ProsopoRandomProviderResponse;
-    protected config: {[key: string]: string};
-    public providerApi: ProviderApi;
+    protected providerApi: ProviderApi;
 
-    constructor(contract: ProsopoContract, provider: ProsopoRandomProviderResponse, config: {[key: string]: string}) {
+    constructor(contract: ProsopoContract, provider: ProsopoRandomProviderResponse, providerApi: ProviderApi) {
         this.contract = contract;
         this.provider = provider;
-        this.config = config;
-        this.providerApi = new ProviderApi(config['providerApi.baseURL'], config['providerApi.prefix']);
+        this.providerApi = providerApi;
     }
 
     public async getCaptchaChallenge(): Promise<ProsopoCaptchaResponse> {
@@ -52,14 +50,14 @@ export class ProCaptcha {
         const commitmentId = tree.root!.hash;
 
         console.log("commitmentId", commitmentId);
-
         console.log("solveCaptchaChallenge ACCOUNT", this.contract.getAccount().address);
-
         console.log("solveCaptchaChallenge ADDRESS", this.contract.address);
+
+        const dappAccount = this.providerApi.getConfig('dappAccount') as string;
 
         const tx = await this.contract.dappUserCommit(
             signer,
-            this.config['dappAccount'],
+            dappAccount,
             datasetId as string,
             commitmentId,
             this.provider.providerId,
@@ -67,7 +65,7 @@ export class ProCaptcha {
 
         console.log("TRANSACTION", tx);
 
-        const submit = await this.providerApi.submitCaptchaSolution(tx.blockHash, captchaSolutionsSalted, this.config['dappAccount'], requestHash, tx.txHash.toString(), this.contract.getAccount().address);
+        const submit = await this.providerApi.submitCaptchaSolution(tx.blockHash, captchaSolutionsSalted, requestHash, tx.txHash.toString(), this.contract.getAccount().address);
 
         console.log("SUBMIT", submit);
 

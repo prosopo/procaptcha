@@ -48,8 +48,9 @@ function App() {
   const [captchaChallenge, setCaptchaChallenge] = useState<ProsopoCaptchaResponse | null>(null);
   const [captchaSolution, setCaptchaSolution] = useState<number[]>([]);
 
+  const providerApi = new ProviderApi(config);
+
   useEffect(() => {
-    const providerApi = new ProviderApi(config['providerApi.baseURL'], config['providerApi.prefix']);
     Promise.all([providerApi.getContractAddress(), getExtension()])
       .then(result => {
           const [_contractAddress, _extension] = result;
@@ -95,9 +96,12 @@ function App() {
     // const { nonce } = await contract.getApi().query.system.account(account.address!);
     console.log("SIGNER", signer);
 
-    const proCaptcha = new ProCaptcha(contract, provider, config);
+    const proCaptcha = new ProCaptcha(contract, provider, providerApi);
     const currentCaptcha = captchaChallenge.captchas[currentCaptchaIndex];
     const { captchaId, datasetId } = currentCaptcha.captcha;
+
+    // TODO loading...
+
     const solved = await proCaptcha.solveCaptchaChallenge(signer, captchaChallenge.requestHash, captchaId, datasetId, captchaSolution);
 
     console.log("CAPTCHA SOLVED", solved);
@@ -130,7 +134,7 @@ function App() {
 
       console.log("PROVIDER", _provider);
 
-      const proCaptcha = new ProCaptcha(_contract, _provider, config);
+      const proCaptcha = new ProCaptcha(_contract, _provider, providerApi);
       setCaptchaChallenge(await proCaptcha.getCaptchaChallenge());
     });
   };

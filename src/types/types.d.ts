@@ -39,3 +39,9 @@ interface CaptchaSolution {
   solution: number[];
   salt: string;
 }
+
+interface ProviderApiConfig {
+  "providerApi.baseURL": string;
+  "providerApi.prefix": string;
+  "dappAccount": string;
+}
