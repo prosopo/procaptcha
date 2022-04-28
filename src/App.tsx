@@ -85,7 +85,7 @@ function App() {
     setCurrentCaptchaIndex(0);
   };
 
-  const submitCaptchaHandler = async () => {
+  const submitCaptchaSolution = async () => {
     if (!extension || !contract || !provider || !captchaChallenge) {
       // TODO throw error
       return;
@@ -98,7 +98,7 @@ function App() {
     const proCaptcha = new ProCaptcha(contract, provider, config);
     const currentCaptcha = captchaChallenge.captchas[currentCaptchaIndex];
     const { captchaId, datasetId } = currentCaptcha.captcha;
-    const solved = await proCaptcha.solveCaptchaChallenge(signer, captchaId, datasetId, captchaSolution);
+    const solved = await proCaptcha.solveCaptchaChallenge(signer, captchaChallenge.requestHash, captchaId, datasetId, captchaSolution);
 
     console.log("CAPTCHA SOLVED", solved);
 
@@ -197,7 +197,7 @@ function App() {
             <Button onClick={cancelCaptchas} variant="text">
               Cancel
             </Button>
-            <Button onClick={submitCaptchaHandler} variant="contained">
+            <Button onClick={submitCaptchaSolution} variant="contained">
               {currentCaptchaIndex === totalCaptchas - 1
                 ? "Submit"
                 : "Next"}

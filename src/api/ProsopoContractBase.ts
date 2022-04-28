@@ -82,17 +82,17 @@ export class ProsopoContractBase extends AsyncFactory {
 
     const abiMessage = this.abi.findMessage(method);
 
-    // https://polkadot.js.org/docs/api-contract/start/contract.tx
-    const extrinsic = this.contract.tx[method]({/* value, gasLimit */}, ...encodeStringArgs(abiMessage, args));
+    const extrinsic = this.contract.tx[method]({}, ...encodeStringArgs(abiMessage, args));
 
     this.api.setSigner(signer);
 
-      // const response = await buildTx(this.api.registry, extrinsic, this.account.address, { signer });
-      // console.log("buildTx RESPONSE", response);
-      // return;
+    // const response = await buildTx(this.api.registry, extrinsic, this.account.address, { signer });
+    // console.log("buildTx RESPONSE", response);
+    // return;
 
     return new Promise((resolve, reject) => {
 
+      // https://polkadot.js.org/docs/api/cookbook/tx/
       extrinsic.signAndSend(this.account.address, { signer }, (result: SubmittableResult) => {
 
         const { dispatchError, dispatchInfo, events, internalError, status, txHash, txIndex } = result;
@@ -100,21 +100,15 @@ export class ProsopoContractBase extends AsyncFactory {
         // console.log("RESULT JSON", JSON.stringify(result));
         // console.log("RESULT HUMAN", result.toHuman());
 
-        console.log("DISPATCH INFO", dispatchInfo);
-        console.log("txHash", txHash);
-        console.log("status", status);
+        console.log("STATUS", status.type);
         console.log("EVENTS", events);
         console.log("IS FINALIZED", status?.isFinalized); // TODO
         console.log("IN BLOCK", status?.isInBlock);
 
-        // https://polkadot.js.org/docs/api/cookbook/tx/
-        // if (status?.isInBlock || status?.isFinalized) {
-        if (status?.isInBlock) {
-
-          const blockHash = status.asInBlock.toHex();
-
-          console.log("AS BLOCK", status.asInBlock);
-          console.log("BLOCK HASH", blockHash);
+        // https://polkadot.js.org/docs/api/start/api.tx.subs/
+        if (status?.isFinalized) {
+          
+          const blockHash = status.asFinalized.toHex();
 
           resolve({ dispatchError, dispatchInfo, events, internalError, status, txHash, txIndex, blockHash });
 

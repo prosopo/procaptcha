@@ -4,7 +4,7 @@ class HttpClientBase {
 
   protected readonly axios: AxiosInstance;
 
-  constructor(baseURL: string, prefix = "/v1/prosopo") {
+  constructor(baseURL: string, prefix = "") {
     
     baseURL = baseURL + prefix;
     

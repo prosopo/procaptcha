@@ -45,7 +45,7 @@ export class ProCaptcha {
     public async solveCaptchaChallenge(signer: Signer, requestHash: string, captchaId: string, datasetId: string, solution: number[]) : Promise<Partial<TransactionResponse>> {
         const salt = randomAsHex();
         const tree = new CaptchaMerkleTree();
-        const captchaSolutionsSalted = [{ captchaId, solution, salt }];
+        const captchaSolutionsSalted: CaptchaSolution[] = [{ captchaId, solution, salt }];
         const captchasHashed = captchaSolutionsSalted.map((captcha) => computeCaptchaSolutionHash(captcha));
 
         tree.build(captchasHashed);
@@ -65,7 +65,9 @@ export class ProCaptcha {
             this.provider.providerId,
         );
 
-        const submit = await this.providerApi.submitCaptchaSolution(tx.blockHash, solution, this.config['dappAccount'], requestHash, tx.txHash.toString(), this.contract.getAccount().address);
+        console.log("TRANSACTION", tx);
+
+        const submit = await this.providerApi.submitCaptchaSolution(tx.blockHash, captchaSolutionsSalted, this.config['dappAccount'], requestHash, tx.txHash.toString(), this.contract.getAccount().address);
 
         console.log("SUBMIT", submit);
 

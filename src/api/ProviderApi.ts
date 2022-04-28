@@ -26,8 +26,8 @@ export class ProviderApi extends HttpClientBase {
     return this.axios.get(`/provider/captcha/${provider.captchaDatasetId}/${provider.serviceOrigin}/${blockNumber}`);
   }
 
-  public submitCaptchaSolution(blockHash: string, captchas: number[], dappAccount: string, requestHash: string, txHash: string, userAccount: string) : Promise<any> {
-    return this.axios.post(`/provider/captcha/solution`, {blockHash, captchas, dappAccount, requestHash, txHash, userAccount});
+  public submitCaptchaSolution(blockHash: string, captchas: CaptchaSolution[], dappAccount: string, requestHash: string, txHash: string, userAccount: string) : Promise<any> {
+    return this.axios.post(`/provider/solution`, {blockHash, captchas, dappAccount, requestHash, txHash, userAccount});
   }
 
 }

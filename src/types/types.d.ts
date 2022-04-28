@@ -33,3 +33,9 @@ interface ProsopoCaptchaResponse {
   captchas: ProsopoCaptcha[];
   requestHash: string;
 }
+
+interface CaptchaSolution {
+  captchaId: string;
+  solution: number[];
+  salt: string;
+}
