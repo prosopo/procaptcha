@@ -56,6 +56,8 @@ export class ProCaptcha {
 
         console.log("solveCaptchaChallenge ADDRESS", this.contract.address);
 
+        // this.contract.getApi().setSigner(signer);
+
         const response = await this.contract.dappUserCommit(
             signer,
             this.config['dappAccount'],

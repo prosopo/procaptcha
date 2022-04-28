@@ -17,7 +17,7 @@ export class ProviderApi extends HttpClientBase {
   }
 
   public getProviders(): Promise<{accounts: string[]}> {
-    return this.axios.get(`/providers/`);
+    return this.axios.get(`/providers`);
   }
 
   public getCaptchaChallenge(randomProvider: ProsopoRandomProviderResponse) : Promise<ProsopoCaptchaResponse> {

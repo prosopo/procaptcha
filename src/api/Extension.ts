@@ -6,30 +6,23 @@ import {
 import { InjectedAccountWithMeta, InjectedExtension } from "@polkadot/extension-inject/types"
 import { SignerPayloadRaw } from "@polkadot/types/types";
 import storage from "../modules/storage";
+import AsyncFactory from "./AsyncFactory";
 
 /**
  * type for callback when no extension was found
  */
 export type NoExtensionCallback = () => void | Promise<void>;
 
-class Extension {
+class Extension extends AsyncFactory {
 
     private account: InjectedAccountWithMeta;
     private injected: InjectedExtension;
     private allAccounts: InjectedAccountWithMeta[];
 
-    constructor() {
-        throw new Error("Use `create` factory method");
-    }
-
-    public static async create(...args: any[]) {
-        return await Object.create(this.prototype).init(...args);
-    }
-
     /**
      * @param noExtCb - callback when no extension was found
      */
-    protected async init(noExtCb?: NoExtensionCallback) {
+    public async init(noExtCb?: NoExtensionCallback) {
         await this.checkExtensions(noExtCb || (() => { }));
         this.allAccounts = await web3Accounts();
         await this._loadAccount();

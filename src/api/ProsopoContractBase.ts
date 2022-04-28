@@ -9,30 +9,23 @@ import { unwrap, encodeStringArgs } from "../common/helpers";
 import Extension, { NoExtensionCallback } from "./Extension";
 import { Signer } from "@polkadot/api/types";
 import { buildTx } from "@prosopo/contract";
-import { contractDefinitions } from "@prosopo/contract"
-export class ProsopoContractBase {
+import { contractDefinitions } from "@prosopo/contract";
+import AsyncFactory from "./AsyncFactory";
+export class ProsopoContractBase extends AsyncFactory {
 
-  public api: ApiPromise;
+  protected api: ApiPromise;
   protected abi: Abi;
   protected contract: ContractPromise;
   protected account: InjectedAccountWithMeta;
 
   public address: string;
 
-  constructor() {
-    throw new Error("Use `create` factory method");
-  }
-
-  public static async create(...args: any[]) {
-    return await Object.create(this.prototype).init(...args);
-  }
-
   /**
    * @param address
    * @param account
    * @param providerInterface
    */
-  protected async init(address: string, account: InjectedAccountWithMeta, providerInterface: ProviderInterface) {
+  public async init(address: string, account: InjectedAccountWithMeta, providerInterface: ProviderInterface) {
     this.api = await ApiPromise.create({ provider: providerInterface });
     this.abi = new Abi(abiJson, this.api.registry.getChainProperties());
     //await this.api.registry.register(contractDefinitions);
@@ -42,12 +35,16 @@ export class ProsopoContractBase {
     return this;
   }
 
-  public getAccount(): InjectedAccountWithMeta {
-    return this.account;
+  public getApi(): ApiPromise {
+    return this.api;
   }
 
   public getContract(): ContractPromise {
     return this.contract;
+  }
+
+  public getAccount(): InjectedAccountWithMeta {
+    return this.account;
   }
 
   public async query<T>(method: string, args: any[]): Promise<T | AnyJson | null> {
@@ -77,18 +74,19 @@ export class ProsopoContractBase {
 
   public async transaction<T>(signer: Signer, method: string, args: any[]): Promise<T | AnyJson | null | any> {
 
-    const test = await this.query(method, args);
+    const queryBeforeTx = await this.query(method, args);
 
-    console.log("query....................", test);
+    console.log("QUERY BEFORE TX....................", queryBeforeTx);
+
+    const abiMessage = this.abi.findMessage(method);
+
+    // https://polkadot.js.org/docs/api-contract/start/contract.tx
+    const extrinsic = this.contract.tx[method]({/* value, gasLimit */}, ...encodeStringArgs(abiMessage, args));
+
+    this.api.setSigner(signer);
 
     try {
-      const abiMessage = this.abi.findMessage(method);
-      const extrinsic = this.contract.tx[method](
-        {/* value, gasLimit */}, // https://polkadot.js.org/docs/api-contract/start/contract.tx
-        ...encodeStringArgs(abiMessage, args)
-      )
-
-        // const response = await buildTx(this.api.registry, extrinsic, this.account.address, { signer });
+      // const response = await buildTx(this.api.registry, extrinsic, this.account.address, { signer });
       // console.log("buildTx RESPONSE", response);
       // return;
 

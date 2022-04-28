@@ -92,8 +92,7 @@ function App() {
     }
 
     const signer = extension.getInjected().signer;
-    await contract.api.setSigner(signer)
-    const { nonce } = await contract.api.query.system.account(account.address!);
+    // const { nonce } = await contract.getApi().query.system.account(account.address!);
     console.log("SIGNER", signer);
 
     const proCaptcha = new ProCaptcha(contract, provider, config);
