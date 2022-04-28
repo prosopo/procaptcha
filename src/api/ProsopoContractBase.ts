@@ -10,7 +10,9 @@ import Extension, { NoExtensionCallback } from "./Extension";
 import { Signer } from "@polkadot/api/types";
 import { buildTx } from "@prosopo/contract";
 import { contractDefinitions } from "@prosopo/contract";
+import { TransactionResponse } from '../types/contract';
 import AsyncFactory from "./AsyncFactory";
+
 export class ProsopoContractBase extends AsyncFactory {
 
   protected api: ApiPromise;
@@ -72,7 +74,7 @@ export class ProsopoContractBase extends AsyncFactory {
     }
   }
 
-  public async transaction<T>(signer: Signer, method: string, args: any[]): Promise<T | AnyJson | null | any> {
+  public async transaction(signer: Signer, method: string, args: any[]): Promise<Partial<TransactionResponse>> {
 
     const queryBeforeTx = await this.query(method, args);
 
@@ -85,54 +87,63 @@ export class ProsopoContractBase extends AsyncFactory {
 
     this.api.setSigner(signer);
 
-    try {
       // const response = await buildTx(this.api.registry, extrinsic, this.account.address, { signer });
       // console.log("buildTx RESPONSE", response);
       // return;
 
-      // https://polkadot.js.org/docs/api-contract/start/contract.tx
-      return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
 
-        extrinsic.signAndSend(this.account.address, { signer }, (result: SubmittableResult) => {
+      extrinsic.signAndSend(this.account.address, { signer }, (result: SubmittableResult) => {
 
-          console.log("RESULT", JSON.stringify(result));
+        const { dispatchError, dispatchInfo, events, internalError, status, txHash, txIndex } = result;
 
-          const blockHash = result.status?.asInBlock?.toHex();
+        // console.log("RESULT JSON", JSON.stringify(result));
+        // console.log("RESULT HUMAN", result.toHuman());
 
+        console.log("DISPATCH INFO", dispatchInfo);
+        console.log("txHash", txHash);
+        console.log("status", status);
+        console.log("EVENTS", events);
+        console.log("IS FINALIZED", status?.isFinalized); // TODO
+        console.log("IN BLOCK", status?.isInBlock);
+
+        // https://polkadot.js.org/docs/api/cookbook/tx/
+        // if (status?.isInBlock || status?.isFinalized) {
+        if (status?.isInBlock) {
+
+          const blockHash = status.asInBlock.toHex();
+
+          console.log("AS BLOCK", status.asInBlock);
           console.log("BLOCK HASH", blockHash);
 
-          console.log("IS FINALIZED", result.status?.isFinalized);
+          resolve({ dispatchError, dispatchInfo, events, internalError, status, txHash, txIndex, blockHash });
 
-          console.log("IN BLOCK", result.status?.isInBlock);
-          if (result.isInBlock) {
-            console.log("AS BLOCK", result.status.asInBlock);
-          }
-          console.log("RESULT HUMAN", result.toHuman());
-          console.log("txHash", result.txHash);
-          console.log("status", result.status);
+          return;
+        
+        }
 
-          console.log("EVENTS", result.events);
+        if (internalError) {
+          console.error("internalError", internalError);
+          reject(internalError);
 
-          // https://polkadot.js.org/docs/api/cookbook/tx/
-          if (result.status?.isInBlock || result.status?.isFinalized) {
-            if (result.events) {
-                console.log("EVENTS", result.events);
-            }
-          }
+          return;
+        }
 
-          resolve(result);
+        if (dispatchError) {
+          console.error("dispatchError", dispatchError);
+          reject(dispatchError);
+        }
 
-        }).catch((error) => {
-          throw error.error || error;
-        });
-
+      })
+      .catch((e) => { 
+        console.error("signAndSend ERROR", e);
+        reject(e);
       });
 
-    } catch (e) {
-      console.log(["ERROR", e]);
-      return null;
-    }
+    });
+
   }
+
 }
 
 export default ProsopoContractBase;

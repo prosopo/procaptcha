@@ -1,9 +1,9 @@
 declare module "*.json" {
-    const value: any;
-    export default value;
-  }
+  const value: any;
+  export default value;
+}
 
-
+// import { SubmittableResult } from "@polkadot/api";
 interface ProsopoRandomProviderResponse {
   providerId: string,
   blockNumber: string;
@@ -17,7 +17,6 @@ interface ProposoProvider {
   serviceOrigin: string;
   status: string; // TODO: enum
 }
-
 
 interface CaptchaSet {
   captchaId: string;

@@ -9,8 +9,7 @@ import {CaptchaSolution, CaptchaMerkleTree} from '@prosopo/provider-core';
 // import {computeCaptchaSolutionHash} from '@prosopo/provider-core'; // TODO
 
 import { Signer } from "@polkadot/api/types";
-
-import config from "../config";
+import { TransactionResponse } from "../types/contract";
 
 
 function hexHash(data: string | Uint8Array): string {
@@ -43,7 +42,7 @@ export class ProCaptcha {
         return captchaPuzzle;
     }
 
-    public async solveCaptchaChallenge(signer: Signer, captchaId: string, datasetId: string, solution: number[]) : Promise<any> {
+    public async solveCaptchaChallenge(signer: Signer, requestHash: string, captchaId: string, datasetId: string, solution: number[]) : Promise<Partial<TransactionResponse>> {
         const salt = randomAsHex();
         const tree = new CaptchaMerkleTree();
         const captchaSolutionsSalted = [{ captchaId, solution, salt }];
@@ -52,24 +51,27 @@ export class ProCaptcha {
         tree.build(captchasHashed);
         const commitmentId = tree.root!.hash;
 
+        console.log("commitmentId", commitmentId);
+
         console.log("solveCaptchaChallenge ACCOUNT", this.contract.getAccount().address);
 
         console.log("solveCaptchaChallenge ADDRESS", this.contract.address);
 
-        // this.contract.getApi().setSigner(signer);
-
-        const response = await this.contract.dappUserCommit(
+        const tx = await this.contract.dappUserCommit(
             signer,
             this.config['dappAccount'],
-            // this.contract.getAccount().address,
             datasetId as string,
             commitmentId,
             this.provider.providerId,
         );
 
-        console.log("response Stringified", JSON.stringify(response))
+        const submit = await this.providerApi.submitCaptchaSolution(tx.blockHash, solution, this.config['dappAccount'], requestHash, tx.txHash.toString(), this.contract.getAccount().address);
 
-        return response;
+        console.log("SUBMIT", submit);
+
+        // submitCaptchaSolution(blockHash: string, captchas: number[], dappAccount: string, requestHash: string, txHash: string, userAccount: string) : Promise<any> {
+
+        return tx;
     }
 
 }
