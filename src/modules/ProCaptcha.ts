@@ -53,11 +53,10 @@ export class ProCaptcha {
         console.log("solveCaptchaChallenge ACCOUNT", this.contract.getAccount().address);
         console.log("solveCaptchaChallenge ADDRESS", this.contract.address);
 
-        const dappAccount = this.providerApi.getConfig('dappAccount') as string;
+        // const dappAccount = this.providerApi.getConfig('dappAccount') as string;
 
         const tx = await this.contract.dappUserCommit(
             signer,
-            dappAccount,
             datasetId as string,
             commitmentId,
             this.provider.providerId,

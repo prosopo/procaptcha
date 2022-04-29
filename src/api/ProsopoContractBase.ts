@@ -19,6 +19,7 @@ export class ProsopoContractBase extends AsyncFactory {
   protected abi: Abi;
   protected contract: ContractPromise;
   protected account: InjectedAccountWithMeta;
+  protected dappAdress: string;
 
   public address: string;
 
@@ -27,13 +28,13 @@ export class ProsopoContractBase extends AsyncFactory {
    * @param account
    * @param providerInterface
    */
-  public async init(address: string, account: InjectedAccountWithMeta, providerInterface: ProviderInterface) {
+  public async init(address: string, dappAdress: string, account: InjectedAccountWithMeta, providerInterface: ProviderInterface) {
     this.api = await ApiPromise.create({ provider: providerInterface });
     this.abi = new Abi(abiJson, this.api.registry.getChainProperties());
-    //await this.api.registry.register(contractDefinitions);
     this.contract = new ContractPromise(this.api, this.abi, address);
-    this.account = account;
     this.address = address;
+    this.dappAdress = dappAdress;
+    this.account = account;
     return this;
   }
 
@@ -84,7 +85,7 @@ export class ProsopoContractBase extends AsyncFactory {
 
     const extrinsic = this.contract.tx[method]({}, ...encodeStringArgs(abiMessage, args));
 
-    this.api.setSigner(signer);
+    // this.api.setSigner(signer);
 
     // const response = await buildTx(this.api.registry, extrinsic, this.account.address, { signer });
     // console.log("buildTx RESPONSE", response);
@@ -113,7 +114,6 @@ export class ProsopoContractBase extends AsyncFactory {
           resolve({ dispatchError, dispatchInfo, events, internalError, status, txHash, txIndex, blockHash });
 
           return;
-        
         }
 
         if (internalError) {

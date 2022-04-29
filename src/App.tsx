@@ -126,7 +126,7 @@ function App() {
     extension.setAccount(account.address).then(async (account) => {
       setAccount(account);
 
-      const _contract = await getProsopoContract(contractAddress, account);
+      const _contract = await getProsopoContract(contractAddress, providerApi.getConfig('dappAccount') as string, account);
       setContract(_contract);
 
       const _provider = await _contract.getRandomProvider();
