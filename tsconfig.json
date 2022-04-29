@@ -32,7 +32,7 @@
     "rootDir": "./",
     "outDir": "./build",
     "baseUrl": ".",
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
   },
   "include": [
     "packages/**/*.ts",

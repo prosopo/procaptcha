@@ -1,5 +1,6 @@
-import React, { useState, useEffect, SyntheticEvent } from "react";
+import React, { useState, useEffect, useMemo, SyntheticEvent } from "react";
 import { InjectedAccountWithMeta } from "@polkadot/extension-inject/types";
+// import { HttpProvider } from "@polkadot/rpc-provider";
 import {
   Box,
   Button,
@@ -7,113 +8,138 @@ import {
   Autocomplete,
   TextField
 } from "@mui/material";
-import abiJson from "./abi/prosopo.json";
+
 import config from "./config";
+
 import ProsopoContract from "./api/ProsopoContract";
-import { getCaptchaChallenge } from "./components/captcha";
+import Extension from "./api/Extension";
+import ProviderApi from "./api/ProviderApi";
+
+import { getExtension } from "./modules/extension";
+import { getProsopoContract } from "./modules/contract";
+import ProCaptcha from "./modules/ProCaptcha";
 import { CaptchaWidget } from "./components/CaptchaWidget";
-import { createNetwork } from '@prosopo/contract'
+
 import "./App.css";
 import { useStyles } from "./app.styles";
 
-const { providerApi, networkConfig } = config;
-const network = createNetwork('', networkConfig);
+// const { providerApi } = config;
 
 function App() {
+
   const classes = useStyles();
 
+  const [contractAddress, setContractAddress] = useState<string>('');
   const [contract, setContract] = useState<ProsopoContract | null>(null);
-  const [accounts, setAccounts] = useState<InjectedAccountWithMeta[]>([]);
+  const [extension, setExtension] = useState<Extension | null>(null);
+
+  // const [accounts, setAccounts] = useState<InjectedAccountWithMeta[]>([]);
   const [account, setAccount] = useState<InjectedAccountWithMeta | null>(null);
 
   const [showCaptchas, setShowCaptchas] = useState(false);
-  const [totalNumberOfCaptchas, setTotalNumberOfCaptchas] = useState(0);
+  const [totalCaptchas, setTotalCaptchas] = useState(0);
   const [currentCaptchaIndex, setCurrentCaptchaIndex] = useState(0);
 
   // let currentCaptcha: ProsopoCaptcha | undefined;
-
   // const accounts = contract.extension?.getAllAcounts();
-  const [captchaChallenge, setCaptchaChallenge] = useState<ProsopoCaptchaResponse | null>(null);
 
+  const [provider, setProvider] = useState<ProsopoRandomProviderResponse | null>(null);
+
+  const [captchaChallenge, setCaptchaChallenge] = useState<ProsopoCaptchaResponse | null>(null);
   const [captchaSolution, setCaptchaSolution] = useState<number[]>([]);
 
+  const providerApi = new ProviderApi(config);
+
   useEffect(() => {
-    providerApi.getContractAddress()
-      .then(address => {
-        console.log("ADDRESS", address.contractAddress);
-        const contract = new ProsopoContract(address.contractAddress, abiJson, network);
-        contract.creationPromise().then(() => {
-          console.log("CONTRACT", contract);
-          setContract(contract);
-          setAccounts(contract.extension.getAllAcounts());
-        })
-        .catch(err => {
-            console.error(err);
-        });
+    Promise.all([providerApi.getContractAddress(), getExtension()])
+      .then(result => {
+          const [_contractAddress, _extension] = result;
+          setContractAddress(_contractAddress.contractAddress);
+          setExtension(_extension);
+          // setAccounts(_extension.getAllAcounts());
+          console.log("CONTRACT", _contractAddress.contractAddress);
       })
       .catch(err => {
-        console.error(err);
+          console.error(err);
       });
 
   }, []);
 
   useEffect(() => {
-    setTotalNumberOfCaptchas(captchaChallenge?.captchas.length ?? 0);
+    setTotalCaptchas(captchaChallenge?.captchas.length ?? 0);
     setCurrentCaptchaIndex(0);
   }, [captchaChallenge]);
 
-  // useMemo(() => {
-  //   currentCaptcha = captchaChallenge?.captchas[currentCaptchaIndex];
-  // }, [currentCaptchaIndex]);
+  useEffect(() => {
+    console.log("CLICK SOLUTION", captchaSolution);
+  }, [captchaSolution]);
 
   const toggleShowCaptchas = () => {
     setShowCaptchas(!showCaptchas);
     setAccount(null);
   };
 
-  const cancelCaptchasHandler = () => {
+  const cancelCaptchas = () => {
+    setCaptchaChallenge(null);
     setShowCaptchas(false);
     setAccount(null);
     setCurrentCaptchaIndex(0);
   };
 
-  const submitCaptchaHandler = () => {
-    if (currentCaptchaIndex === totalNumberOfCaptchas - 1) {
-      setShowCaptchas(!showCaptchas);
-      setAccount(null);
-      setCurrentCaptchaIndex(0);
-    } else {
-      setCurrentCaptchaIndex(currentCaptchaIndex + 1);
-    }
-  };
-
-  // useEffect(() => {
-  //   contract
-  //     .creationPromise()
-  //     .then(() => {
-  //       setAccount(contract.extension.getAccount());
-  //     })
-  //     .catch((err) => {
-  //       console.log(err);
-  //     });
-  // }, []);
-
-  // if (!account) {
-  //   return null;
-  // }
-
-  const onAccountChange = (e: SyntheticEvent<Element, Event>, account: any) => {
-    if (!contract) {
+  const submitCaptchaSolution = async () => {
+    if (!extension || !contract || !provider || !captchaChallenge) {
+      // TODO throw error
       return;
     }
-    contract.extension.setAccount(account.address).then(async (account) => {
+
+    const signer = extension.getInjected().signer;
+    // const { nonce } = await contract.getApi().query.system.account(account.address!);
+    console.log("SIGNER", signer);
+
+    const proCaptcha = new ProCaptcha(contract, provider, providerApi);
+    const currentCaptcha = captchaChallenge.captchas[currentCaptchaIndex];
+    const { captchaId, datasetId } = currentCaptcha.captcha;
+
+    // TODO loading...
+
+    const solved = await proCaptcha.solveCaptchaChallenge(signer, captchaChallenge.requestHash, captchaId, datasetId, captchaSolution);
+
+    console.log("CAPTCHA SOLVED", solved);
+
+    // console.log("dappUserCommit HUMAN", solved.toHuman());
+
+    const nextCaptchaIndex = currentCaptchaIndex + 1;
+
+    if (nextCaptchaIndex < totalCaptchas) {
+      setCurrentCaptchaIndex(nextCaptchaIndex);
+    } else {
+      cancelCaptchas();
+    }
+
+  };
+
+
+  const onAccountChange = (e: SyntheticEvent<Element, Event>, account: any) => {
+    if (!extension || !contractAddress) {
+      return;
+    }
+    extension.setAccount(account.address).then(async (account) => {
       setAccount(account);
-      setCaptchaChallenge(await getCaptchaChallenge(contract, account));
+
+      const _contract = await getProsopoContract(contractAddress, providerApi.getConfig('dappAccount') as string, account);
+      setContract(_contract);
+
+      const _provider = await _contract.getRandomProvider();
+      setProvider(_provider);
+
+      console.log("PROVIDER", _provider);
+
+      const proCaptcha = new ProCaptcha(_contract, _provider, providerApi);
+      setCaptchaChallenge(await proCaptcha.getCaptchaChallenge());
     });
   };
 
   const onCaptchaSolutionClick = (index: number) => {
-    console.log("CLICK SOLUTION", index);
     if (captchaSolution.includes(index)) {
       setCaptchaSolution(captchaSolution.filter(item => item !== index));
     } else {
@@ -127,7 +153,7 @@ function App() {
         <Autocomplete
           disablePortal
           id="select-accounts"
-          options={accounts}
+          options={extension?.getAllAcounts() || []}
           value={account}
           isOptionEqualToValue={(option, value) =>
             option.address === value.address
@@ -156,7 +182,7 @@ function App() {
             {captchaChallenge && <CaptchaWidget challenge={captchaChallenge[currentCaptchaIndex]} solution={captchaSolution} solutionClickEvent={onCaptchaSolutionClick} />}
 
             <Box className={classes.dotsContainer}>
-              {Array.from(Array(totalNumberOfCaptchas).keys()).map((item, index) => {
+              {Array.from(Array(totalCaptchas).keys()).map((item, index) => {
                 return (
                   <Box
                     key={index}
@@ -172,11 +198,11 @@ function App() {
           </Box>
 
           <Box className={classes.captchasFooter}>
-            <Button onClick={cancelCaptchasHandler} variant="text">
+            <Button onClick={cancelCaptchas} variant="text">
               Cancel
             </Button>
-            <Button onClick={submitCaptchaHandler} variant="contained">
-              {currentCaptchaIndex === totalNumberOfCaptchas - 1
+            <Button onClick={submitCaptchaSolution} variant="contained">
+              {currentCaptchaIndex === totalCaptchas - 1
                 ? "Submit"
                 : "Next"}
             </Button>

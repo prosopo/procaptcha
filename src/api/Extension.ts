@@ -5,16 +5,16 @@ import {
 } from "@polkadot/extension-dapp";
 import { InjectedAccountWithMeta, InjectedExtension } from "@polkadot/extension-inject/types"
 import { SignerPayloadRaw } from "@polkadot/types/types";
-import storage from "./storage";
+import storage from "../modules/storage";
+import AsyncFactory from "./AsyncFactory";
 
 /**
  * type for callback when no extension was found
  */
 export type NoExtensionCallback = () => void | Promise<void>;
 
-class Extension {
-    private initPromise: Promise<void>;
-    private isReady = false;
+class Extension extends AsyncFactory {
+
     private account: InjectedAccountWithMeta;
     private injected: InjectedExtension;
     private allAccounts: InjectedAccountWithMeta[];
@@ -22,35 +22,13 @@ class Extension {
     /**
      * @param noExtCb - callback when no extension was found
      */
-    constructor(noExtCb?: NoExtensionCallback) {
-        this.initPromise = new Promise(async (resolve) => {
-            await this.checkExtensions(noExtCb || (() => { }));
-            this.allAccounts = await web3Accounts();
-            await this._loadAccount();
-            console.log(this.account)
-            this.injected = await web3FromSource(this.account.meta.source);
-            this.isReady = true;
-            resolve()
-        })
-    }
-
-    /**
-     * await this to make sure creation completes
-     */
-    public async creationPromise() {
-        await this.initPromise;
-        return;
-    }
-
-    private throwIfNotReady() {
-        if (!this.isReady) {
-            throw new Error("Extension not ready. Try doing: 'await creationPromise()'")
-        }
-    }
-
-    private async waitAndThrowIfNotReady() {
-        await this.initPromise;
-        this.throwIfNotReady();
+    public async init(noExtCb?: NoExtensionCallback) {
+        await this.checkExtensions(noExtCb || (() => { }));
+        this.allAccounts = await web3Accounts();
+        await this._loadAccount();
+        console.log(this.account)
+        this.injected = await web3FromSource(this.account.meta.source);
+        return this;
     }
 
     public async checkExtensions(cb: NoExtensionCallback, compatInits?: (() => Promise<boolean>)[]) {
@@ -74,12 +52,10 @@ class Extension {
     }
 
     public async loadAccount() {
-        await this.waitAndThrowIfNotReady();
         return this._loadAccount();
     }
 
     public async setAccount(address: string): Promise<InjectedAccountWithMeta> {
-        await this.waitAndThrowIfNotReady();
         const account = this.allAccounts.find(acc => acc.address === address);
         if (!account) {
             throw new Error("Account doesn't exist")
@@ -89,23 +65,18 @@ class Extension {
     }
 
     public getAccount() {
-        this.throwIfNotReady();
         return this.account;
     }
 
-    public getAllAcounts(): InjectedAccountWithMeta[] {
-        this.throwIfNotReady();
-        console.log(this.allAccounts)
+    public getAllAcounts() {
         return this.allAccounts;
     }
 
     public getInjected() {
-        this.throwIfNotReady();
         return this.injected;
     }
 
     public async signRaw(raw: Omit<SignerPayloadRaw, "address">) {
-        await this.waitAndThrowIfNotReady();
         return (this.injected.signer && this.injected.signer.signRaw && this.injected.signer.signRaw({
             address: this.account.address,
             ...raw
