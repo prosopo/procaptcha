@@ -20,6 +20,8 @@ import { getProsopoContract } from "./modules/contract";
 import ProCaptcha from "./modules/ProCaptcha";
 import { CaptchaWidget } from "./components/CaptchaWidget";
 
+import { getConfig } from "./modules/config";
+
 import "./App.css";
 import { useStyles } from "./app.styles";
 
@@ -48,7 +50,7 @@ function App() {
   const [captchaChallenge, setCaptchaChallenge] = useState<ProsopoCaptchaResponse | null>(null);
   const [captchaSolution, setCaptchaSolution] = useState<number[]>([]);
 
-  const providerApi = new ProviderApi(config);
+  const providerApi = new ProviderApi(getConfig());
 
   useEffect(() => {
     Promise.all([providerApi.getContractAddress(), getExtension()])
@@ -126,7 +128,7 @@ function App() {
     extension.setAccount(account.address).then(async (account) => {
       setAccount(account);
 
-      const _contract = await getProsopoContract(contractAddress, providerApi.getConfig('dappAccount') as string, account);
+      const _contract = await getProsopoContract(contractAddress, getConfig('dappAccount') as string, account);
       setContract(_contract);
 
       const _provider = await _contract.getRandomProvider();
