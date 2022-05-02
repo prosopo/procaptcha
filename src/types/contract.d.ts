@@ -11,5 +11,5 @@ export declare class TransactionResponse implements SubmittableResultValue {
     status: ExtrinsicStatus;
     txHash: Hash;
     txIndex?: number;
-    blockHash: string;
+    blockHash?: string;
 }
