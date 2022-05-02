@@ -79,10 +79,13 @@ export class ProsopoContractBase extends AsyncFactory {
     }
   }
 
-  public async transaction(signer: Signer, method: string, args: any[]): Promise<Partial<TransactionResponse>> {
+  // https://polkadot.js.org/docs/api/cookbook/tx/
+  // https://polkadot.js.org/docs/api/start/api.tx.subs/
+  public async transaction(signer: Signer, method: string, args: any[]): Promise<TransactionResponse> {
 
+    // TODO if DEBUG==true || env.development
     const queryBeforeTx = await this.query(method, args);
-
+  
     console.log("QUERY BEFORE TX....................", queryBeforeTx);
 
     const abiMessage = this.abi.findMessage(method);
@@ -90,35 +93,20 @@ export class ProsopoContractBase extends AsyncFactory {
     const extrinsic = this.contract.tx[method]({}, ...encodeStringArgs(abiMessage, args));
 
     // this.api.setSigner(signer);
-
     // const response = await buildTx(this.api.registry, extrinsic, this.account.address, { signer });
     // console.log("buildTx RESPONSE", response);
     // return;
 
     return new Promise((resolve, reject) => {
 
-      // https://polkadot.js.org/docs/api/cookbook/tx/
       extrinsic.signAndSend(this.account.address, { signer }, (result: SubmittableResult) => {
 
         const { dispatchError, dispatchInfo, events, internalError, status, txHash, txIndex } = result;
 
-        // console.log("RESULT JSON", JSON.stringify(result));
-        // console.log("RESULT HUMAN", result.toHuman());
-
-        console.log("STATUS", status.type);
-        console.log("EVENTS", events);
-        console.log("IS FINALIZED", status?.isFinalized); // TODO
+        console.log("TX STATUS", status.type);
+        console.log("IS FINALIZED", status?.isFinalized);
         console.log("IN BLOCK", status?.isInBlock);
-
-        // https://polkadot.js.org/docs/api/start/api.tx.subs/
-        if (status?.isFinalized) {
-          
-          const blockHash = status.asFinalized.toHex();
-
-          resolve({ dispatchError, dispatchInfo, events, internalError, status, txHash, txIndex, blockHash });
-
-          return;
-        }
+        console.log("EVENTS", events);
 
         if (internalError) {
           console.error("internalError", internalError);
@@ -130,6 +118,17 @@ export class ProsopoContractBase extends AsyncFactory {
         if (dispatchError) {
           console.error("dispatchError", dispatchError);
           reject(dispatchError);
+
+          return;
+        }
+
+        // [Ready, InBlock, Finalized...]
+        if (status?.isFinalized) {
+          
+          const blockHash = status.asFinalized.toHex();
+
+          resolve({ dispatchError, dispatchInfo, events, internalError, status, txHash, txIndex, blockHash });
+          
         }
 
       })

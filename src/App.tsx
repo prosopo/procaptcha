@@ -104,17 +104,21 @@ function App() {
 
     // TODO loading...
 
-    const solved = await proCaptcha.solveCaptchaChallenge(signer, captchaChallenge.requestHash, captchaId, datasetId, captchaSolution);
-
-    console.log("CAPTCHA SOLVED", solved);
-
-    // console.log("dappUserCommit HUMAN", solved.toHuman());
+    try {
+      const solved = await proCaptcha.solveCaptchaChallenge(signer, captchaChallenge.requestHash, captchaId, datasetId, captchaSolution);
+      console.log("CAPTCHA SOLVED", solved);
+      alert(solved.status);
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+    }
 
     const nextCaptchaIndex = currentCaptchaIndex + 1;
 
     if (nextCaptchaIndex < totalCaptchas) {
       setCurrentCaptchaIndex(nextCaptchaIndex);
     } else {
+      // TODO after all captchas solved.
       cancelCaptchas();
     }
 

@@ -10,7 +10,10 @@ class HttpClientBase {
     this.axios.interceptors.response.use(this.responseHandler, this.errorHandler);
   }
 
-  protected responseHandler = ({ data }: AxiosResponse) => data;
+  protected responseHandler = (response: AxiosResponse) => {
+    console.log("API REQUEST", response.request);
+    return response.data;
+  }
 
   protected errorHandler = (error: any) => Promise.reject(error.response);
 

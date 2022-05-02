@@ -10,6 +10,7 @@ import {CaptchaSolution, CaptchaMerkleTree} from '@prosopo/provider-core';
 
 import { Signer } from "@polkadot/api/types";
 import { TransactionResponse } from "../types/contract";
+import { ModuleResolutionKind } from "typescript";
 
 
 function hexHash(data: string | Uint8Array): string {
@@ -33,14 +34,12 @@ export class ProCaptcha {
     }
 
     public async getCaptchaChallenge(): Promise<ProsopoCaptchaResponse> {
-        // console.log("ACCOUNT", this.contract.getAccount().address);
-        // const randomProvider = await this.contract.getRandomProvider(this.contract.getAccount().address);
         const captchaPuzzle: ProsopoCaptchaResponse = await this.providerApi.getCaptchaChallenge(this.provider);
-        console.log("CAPTCHA", captchaPuzzle);
+        console.log("getCaptchaChallenge RECEIVED CAPTCHA", captchaPuzzle);
         return captchaPuzzle;
     }
 
-    public async solveCaptchaChallenge(signer: Signer, requestHash: string, captchaId: string, datasetId: string, solution: number[]) : Promise<Partial<TransactionResponse>> {
+    public async solveCaptchaChallenge(signer: Signer, requestHash: string, captchaId: string, datasetId: string, solution: number[]) : Promise<CaptchaSolutionResponse> {
         const salt = randomAsHex();
         const tree = new CaptchaMerkleTree();
         const captchaSolutionsSalted: CaptchaSolution[] = [{ captchaId, solution, salt }];
@@ -49,29 +48,32 @@ export class ProCaptcha {
         tree.build(captchasHashed);
         const commitmentId = tree.root!.hash;
 
-        console.log("commitmentId", commitmentId);
-        console.log("solveCaptchaChallenge USER ACCOUNT", this.contract.getAccount().address);
-        console.log("solveCaptchaChallenge DAPP ACCOUNT", this.contract.getDappAddress());
-        console.log("solveCaptchaChallenge CONTRACT ADDRESS", this.contract.getContract().address.toString());
+        console.log("solveCaptchaChallenge commitmentId", commitmentId);
+        // console.log("solveCaptchaChallenge USER ACCOUNT", this.contract.getAccount().address);
+        // console.log("solveCaptchaChallenge DAPP ACCOUNT", this.contract.getDappAddress());
+        // console.log("solveCaptchaChallenge CONTRACT ADDRESS", this.contract.getContract().address.toString());
 
-        // const dappAccount = this.providerApi.getConfig('dappAccount') as string;
+        let tx: TransactionResponse;
 
-        const tx = await this.contract.dappUserCommit(
-            signer,
-            datasetId as string,
-            commitmentId,
-            this.provider.providerId,
-        );
+        try {
+            tx = await this.contract.dappUserCommit(signer, datasetId as string, commitmentId, this.provider.providerId);
+        } catch (e) {
+            console.error("ERROR", e);
+            throw new Error(e.message);
+        }
 
-        console.log("TRANSACTION", tx);
+        console.log("solveCaptchaChallenge dappUserCommit TX", tx);
 
-        const submit = await this.providerApi.submitCaptchaSolution(tx.blockHash, captchaSolutionsSalted, requestHash, tx.txHash.toString(), this.contract.getAccount().address);
+        let result: CaptchaSolutionResponse;
 
-        console.log("SUBMIT", submit);
+        try {
+            result = await this.providerApi.submitCaptchaSolution(tx.blockHash, captchaSolutionsSalted, requestHash, tx.txHash.toString(), this.contract.getAccount().address);
+        } catch (e) {
+            console.error("ERROR", e);
+            throw new Error(e.message);
+        }
 
-        // submitCaptchaSolution(blockHash: string, captchas: number[], dappAccount: string, requestHash: string, txHash: string, userAccount: string) : Promise<any> {
-
-        return tx;
+        return result;
     }
 
 }

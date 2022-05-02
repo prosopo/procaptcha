@@ -40,6 +40,10 @@ interface CaptchaSolution {
   salt: string;
 }
 
+interface CaptchaSolutionResponse {
+  status: string;
+}
+
 interface ProsopoConfig {
   "providerApi.baseURL": string;
   "providerApi.prefix": string;
