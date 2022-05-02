@@ -128,8 +128,6 @@ function App() {
     extension.setAccount(account.address).then(async (account) => {
       setAccount(account);
 
-      console.log('DAPP.....', getConfig('dappAccount'));
-
       const _contract = await getProsopoContract(contractAddress, getConfig('dappAccount') as string, account);
       setContract(_contract);
 

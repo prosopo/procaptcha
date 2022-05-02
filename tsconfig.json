@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "esnext",  // DO NOT CHANGE!
-    "module": "commonjs",  // DO NOT CHANGE!
+    "target": "esnext",
+    "module": "commonjs",
     "moduleResolution": "node",
     "allowJs": true,
     "esModuleInterop": true,
@@ -11,19 +11,19 @@
     "emitDecoratorMetadata": true,
     "declaration": true,
     "strict": true,
-    "noImplicitAny": false /* Raise error on expressions and declarations with an implied 'any' type. */,
-    "strictNullChecks": true /* Enable strict null checks. */,
-    "strictFunctionTypes": true /* Enable strict checking of function types. */,
+    "noImplicitAny": false,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
     "strictPropertyInitialization": false,
-    "noUnusedLocals": false /* Report errors on unused locals. */,
-    "noUnusedParameters": false /* Report errors on unused parameters. */,
-    "noImplicitReturns": true /* Report error when not all code paths in function return a value. */,
-    "noFallthroughCasesInSwitch": true /* Report errors for fallthrough cases in switch statement. */,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
     "importHelpers": true,
     "skipLibCheck": true,
     "composite": true,
     "types": [
-      "node",
+      "node"
     ],
     "lib": [
       "ES6",
@@ -32,12 +32,12 @@
     "rootDir": "./",
     "outDir": "./build",
     "baseUrl": ".",
-    "jsx": "react-jsx",
+    "jsx": "react-jsx"
   },
   "include": [
     "packages/**/*.ts",
     "packages/**/*.tsx",
-    "packages/**/*.json",
+    "packages/**/*.json"
   ],
   "exclude": [
     "node_modules",
