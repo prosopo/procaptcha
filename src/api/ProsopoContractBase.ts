@@ -19,7 +19,7 @@ export class ProsopoContractBase extends AsyncFactory {
   protected abi: Abi;
   protected contract: ContractPromise;
   protected account: InjectedAccountWithMeta;
-  protected dappAdress: string;
+  protected dappAddress: string;
 
   public address: string;
 
@@ -28,12 +28,12 @@ export class ProsopoContractBase extends AsyncFactory {
    * @param account
    * @param providerInterface
    */
-  public async init(address: string, dappAdress: string, account: InjectedAccountWithMeta, providerInterface: ProviderInterface) {
+  public async init(address: string, dappAddress: string, account: InjectedAccountWithMeta, providerInterface: ProviderInterface) {
     this.api = await ApiPromise.create({ provider: providerInterface });
     this.abi = new Abi(abiJson, this.api.registry.getChainProperties());
     this.contract = new ContractPromise(this.api, this.abi, address);
     this.address = address;
-    this.dappAdress = dappAdress;
+    this.dappAddress = dappAddress;
     this.account = account;
     return this;
   }
@@ -48,6 +48,10 @@ export class ProsopoContractBase extends AsyncFactory {
 
   public getAccount(): InjectedAccountWithMeta {
     return this.account;
+  }
+
+  public getDappAddress(): string {
+    return this.dappAddress;
   }
 
   public async query<T>(method: string, args: any[]): Promise<T | AnyJson | null> {

@@ -19,24 +19,22 @@ export class ProviderApi extends HttpClientBase {
     return this.axios.get(`/random_provider/${userAccount}`);
   }
 
-  public getContractAddress(): Promise<{contractAddress: string}> {
-    return this.axios.get(`/contract_address`);
-  }
-
   public getProviders(): Promise<{accounts: string[]}> {
     return this.axios.get(`/providers`);
+  }
+
+  public getContractAddress(): Promise<{contractAddress: string}> {
+    return this.axios.get(`/contract_address`);
   }
 
   public getCaptchaChallenge(randomProvider: ProsopoRandomProviderResponse) : Promise<ProsopoCaptchaResponse> {
     let { provider, blockNumber } = randomProvider;
     blockNumber = blockNumber.replace(/,/g, ''); // TODO: middleware schema parser/validator.
-    const dappAccount = this.config['dappAccount'];
-    return this.axios.get(`/provider/captcha/${provider.captchaDatasetId}/${provider.serviceOrigin}/${dappAccount}/${blockNumber}`);
+    return this.axios.get(`/provider/captcha/${provider.captchaDatasetId}/${provider.serviceOrigin}/${this.config['dappAccount']}/${blockNumber}`);
   }
 
   public submitCaptchaSolution(blockHash: string, captchas: CaptchaSolution[], requestHash: string, txHash: string, userAccount: string) : Promise<any> {
-    const dappAccount = this.config['dappAccount'];
-    return this.axios.post(`/provider/solution`, {blockHash, captchas, dappAccount, requestHash, txHash, userAccount});
+    return this.axios.post(`/provider/solution`, {blockHash, captchas, requestHash, txHash, userAccount, dappAccount: this.config['dappAccount']});
   }
 
 }
