@@ -1,7 +1,7 @@
 {
   "source": {
-    "hash": "0xd3e20832903455832ecc5aa5b9eb05d711557d1859ada0b9190adabbdf3db4ee",
-    "language": "ink! 3.0.1",
+    "hash": "0xe8d88766aa975e8da366a07c36187423e8017cdf7d23f2b5fbcb4c255cce52f8",
+    "language": "ink! 3.0.0",
     "compiler": "rustc 1.62.0-nightly"
   },
   "contract": {
@@ -1149,6 +1149,15 @@
           "args": [
             {
               "label": "user_account",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 1
+              }
+            },
+            {
+              "label": "dapp_contract_account",
               "type": {
                 "displayName": [
                   "AccountId"

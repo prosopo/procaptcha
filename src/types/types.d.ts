@@ -40,7 +40,7 @@ interface CaptchaSolution {
   salt: string;
 }
 
-interface ProviderApiConfig {
+interface ProsopoConfig {
   "providerApi.baseURL": string;
   "providerApi.prefix": string;
   "dappAccount": string;

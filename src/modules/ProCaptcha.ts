@@ -50,8 +50,9 @@ export class ProCaptcha {
         const commitmentId = tree.root!.hash;
 
         console.log("commitmentId", commitmentId);
-        console.log("solveCaptchaChallenge ACCOUNT", this.contract.getAccount().address);
-        console.log("solveCaptchaChallenge ADDRESS", this.contract.address);
+        console.log("solveCaptchaChallenge USER ACCOUNT", this.contract.getAccount().address);
+        console.log("solveCaptchaChallenge DAPP ACCOUNT", this.contract.getDappAddress());
+        console.log("solveCaptchaChallenge CONTRACT ADDRESS", this.contract.getContract().address.toString());
 
         // const dappAccount = this.providerApi.getConfig('dappAccount') as string;
 

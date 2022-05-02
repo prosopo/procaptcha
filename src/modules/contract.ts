@@ -1,5 +1,5 @@
 import ProsopoContract from "../api/ProsopoContract";
-import { WsProvider } from "@polkadot/rpc-provider";
+import { WsProvider, HttpProvider } from "@polkadot/rpc-provider";
 import { InjectedAccountWithMeta } from "@polkadot/extension-inject/types";
 import { ProviderInterface } from "@polkadot/rpc-provider/types";
 
