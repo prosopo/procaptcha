@@ -59,7 +59,17 @@ export interface ProsopoCaptchaConfig {
   "providerApi.prefix": string;
   "dappAccount": string;
   "dappUrl": string;
+  "dappName": string
   "solutionThreshold": number;
   "web2": boolean;
   "prosopoContractAccount": string;
+  "accountCreator": {
+      "area" : {width: number, height: number},
+      "offsetParameter" : number,
+      "multiplier" : number,
+      "fontSizeFactor" : number,
+      "maxShadowBlur" : number,
+      "numberOfRounds" : number,
+      "seed" : number
+  },
 }
