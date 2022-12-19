@@ -2,7 +2,7 @@ import ProsopoContract from '../api/ProsopoContract'
 import { WsProvider } from '@polkadot/rpc-provider'
 import storage from './storage'
 import { GetCaptchaResponse, ProsopoRandomProviderResponse, ProviderApi } from '@prosopo/api'
-import { hexToString, stringToHex } from '@polkadot/util'
+import { hexToString } from '@polkadot/util'
 import ProsopoCaptchaApi from './ProsopoCaptchaApi'
 import { CaptchaSolution } from '@prosopo/datasets'
 import {
@@ -18,8 +18,7 @@ import { sleep } from '../utils/utils'
 import ExtensionWeb2 from '../api/ExtensionWeb2'
 import ExtensionWeb3 from '../api/ExtensionWeb3'
 import { TCaptchaSubmitResult } from '../types/client'
-import { randomAsHex, signatureVerify } from '@polkadot/util-crypto'
-import { ExpiredError } from '../api/errors'
+import { randomAsHex } from '@polkadot/util-crypto'
 
 export const defaultState = (): Partial<ProcaptchaState> => {
     return {
@@ -197,7 +196,7 @@ export const Manager = (
 
             // setup timeout
             const timeMillis: number = challenge.captchas
-                .map((captcha) => captcha.captcha.timeLimitMillis || 30 * 1000)
+                .map((captcha) => captcha.captcha.timeLimitMs || 30 * 1000)
                 .reduce((a, b) => a + b)
             const timeout = setTimeout(() => {
                 console.log('challenge expired after ' + timeMillis + 'ms')
