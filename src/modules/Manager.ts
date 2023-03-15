@@ -16,11 +16,15 @@ import { sleep } from '../utils/utils'
 import ExtensionWeb2 from '../api/ExtensionWeb2'
 import ExtensionWeb3 from '../api/ExtensionWeb3'
 import { TCaptchaSubmitResult } from '../types/client'
-import { randomAsHex } from '@polkadot/util-crypto'
+import { blake2AsHex, randomAsHex } from '@polkadot/util-crypto'
 import { ContractAbi, ProsopoContractMethods, ProsopoRandomProvider, abiJson } from '@prosopo/contract'
 import { WsProvider } from '@polkadot/rpc-provider'
 import { ApiPromise, Keyring } from '@polkadot/api'
 import { u32 } from '@polkadot/types'
+import { stringToHex, stringToU8a, u8aToHex } from '@polkadot/util';
+import { signatureVerify } from '@polkadot/util-crypto';
+import { SignerPayload } from '@polkadot/types/interfaces'
+import { SignerPayloadRaw } from '@polkadot/types/types'
 
 export const defaultState = (): Partial<ProcaptchaState> => {
     return {
@@ -112,10 +116,56 @@ export const Manager = (
         return config
     }
 
+    const tmp = async () => {
+
+        console.log("IN TMP")
+
+        const account = await loadAccount();
+        console.log(account);
+        const message = 'this is our message';
+
+        // console.log('accounts', keyring.getAccounts())
+        // const address = keyring.decodeAddress(account.account.address);
+        // console.log('address', address);
+        // const pair = keyring.getPair(address);
+        // const pair = keyring.addFromAddress(account.account.address);
+        const keyring = new Keyring({ type: 'ecdsa' });
+        const pair = keyring.addFromUri('//Alice');
+        const sig = pair.sign(message);
+        console.log('sig', sig);
+        console.log('sig hex', u8aToHex(sig));
+        
+
+        // const ext = account.extension;
+        // const signer = ext?.signer;
+        // const signRaw = signer?.signRaw;
+
+        // if(signRaw) {
+            
+        //     // create the message and sign it
+        //     const message = 'this is our message';
+        //     const payload = {
+        //         address: account.account.address,
+        //         data: message,
+        //         type: 'bytes'
+        //     };
+        //     const signed = await signRaw(payload as SignerPayloadRaw);
+            
+        //     console.log('signed', signed);
+        //     console.log('signature', signed.signature);
+        //     console.log('payload', payload);
+        //     console.log('bytes', stringToU8a(message));
+        //     console.log('hex', stringToHex(message));
+        //     console.log('blake', blake2AsHex(message));
+        // }
+
+    }
+
     /**
      * Called on start of user verification. This is when the user ticks the box to claim they are human.
      */
     const start = async () => {
+        await tmp();
         try {
             if (state.loading) {
                 console.log('Procaptcha already loading')

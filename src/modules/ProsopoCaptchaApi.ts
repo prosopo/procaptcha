@@ -115,13 +115,17 @@ export class ProsopoCaptchaApi {
 
         if (!this.web2) {
             try {
-                tx = await this.contract.dappUserCommit(
+                let res = await this.contract.dappUserCommit(
                     this.dappAccount,
                     datasetId as string,
                     commitmentId,
                     this.provider.providerId.toString(),
                     this.userAccount
                 )
+                tx = {
+                    result: res,
+                    from: "",
+                }
             } catch (err) {
                 throw new ProsopoEnvError(err)
             }
